@@ -8,6 +8,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 biscuit-auth = { version = "2.0.0-beta3", features = ["wasm"] }
+console_error_panic_hook = "0.1.7"
 log = "0.4.14"
 rand = "0.7"
 wasm-bindgen = "0.2.78"

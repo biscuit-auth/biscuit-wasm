@@ -1,0 +1,12 @@
+{
+  "name": "biscuit-wasm",
+  "version": "0.1.0",
+  "files": [
+    "biscuit_bg.wasm",
+    "biscuit.js",
+    "biscuit.d.ts"
+  ],
+  "module": "biscuit.js",
+  "types": "biscuit.d.ts",
+  "sideEffects": false
+}
