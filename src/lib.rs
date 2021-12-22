@@ -1,6 +1,4 @@
 use biscuit_auth as biscuit;
-use log::*;
-use rand::prelude::*;
 use wasm_bindgen::prelude::*;
 
 #[global_allocator]
@@ -322,5 +320,5 @@ pub fn run_app() {
     wasm_logger::init(wasm_logger::Config::default());
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
 
-    unsafe { log("biscuit-wasm loading") }
+    log("biscuit-wasm loading")
 }
