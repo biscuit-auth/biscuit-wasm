@@ -18,7 +18,11 @@ impl Biscuit {
     }
 
     pub fn append(&self, block: BlockBuilder) -> Result<Biscuit, JsValue> {
-        Ok(Biscuit(self.0.append(block.0).map_err(|e| e.to_string())?))
+        Ok(Biscuit(
+            self.0
+                .append(block.0)
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+        ))
     }
 
     pub fn authorizer(&self) -> Result<Authorizer, JsValue> {
@@ -29,18 +33,24 @@ impl Biscuit {
     }
 
     pub fn seal(&self) -> Result<Biscuit, JsValue> {
-        Ok(Biscuit(self.0.seal().map_err(|e| e.to_string())?))
+        Ok(Biscuit(
+            self.0
+                .seal()
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+        ))
     }
 
     pub fn from_bytes(data: &[u8], root: &PublicKey) -> Result<Biscuit, JsValue> {
         Ok(Biscuit(
-            biscuit::Biscuit::from(data, |_| root.0).map_err(|e| e.to_string())?,
+            biscuit::Biscuit::from(data, |_| root.0)
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
         ))
     }
 
     pub fn from_base64(data: &str, root: &PublicKey) -> Result<Biscuit, JsValue> {
         Ok(Biscuit(
-            biscuit::Biscuit::from_base64(data, |_| root.0).map_err(|e| e.to_string())?,
+            biscuit::Biscuit::from_base64(data, |_| root.0)
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
         ))
     }
 
@@ -48,12 +58,15 @@ impl Biscuit {
         Ok(self
             .0
             .to_vec()
-            .map_err(|e| e.to_string())?
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?
             .into_boxed_slice())
     }
 
     pub fn to_base64(&self) -> Result<String, JsValue> {
-        Ok(self.0.to_base64().map_err(|e| e.to_string())?)
+        Ok(self
+            .0
+            .to_base64()
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
     }
 
     pub fn revocation_identifiers(&self) -> Box<[JsValue]> {
@@ -95,7 +108,7 @@ impl Authorizer {
     pub fn add_fact(&mut self, fact: &str) -> Result<(), JsValue> {
         self.facts.push(
             fact.try_into()
-                .map_err(|e: biscuit::error::Token| e.to_string())?,
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
         );
         Ok(())
     }
@@ -103,7 +116,7 @@ impl Authorizer {
     pub fn add_rule(&mut self, rule: &str) -> Result<(), JsValue> {
         self.rules.push(
             rule.try_into()
-                .map_err(|e: biscuit::error::Token| e.to_string())?,
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
         );
         Ok(())
     }
@@ -112,7 +125,7 @@ impl Authorizer {
         self.checks.push(
             check
                 .try_into()
-                .map_err(|e: biscuit::error::Token| e.to_string())?,
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
         );
         Ok(())
     }
@@ -121,39 +134,43 @@ impl Authorizer {
         self.policies.push(
             policy
                 .try_into()
-                .map_err(|e: biscuit::error::Token| e.to_string())?,
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
         );
         Ok(())
     }
 
     pub fn authorize(&self) -> Result<usize, JsValue> {
         let mut authorizer = match &self.token {
-            Some(token) => token.authorizer().map_err(|e| e.to_string())?,
-            None => biscuit::Authorizer::new().map_err(|e| e.to_string())?,
+            Some(token) => token
+                .authorizer()
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+            None => biscuit::Authorizer::new().map_err(|e| JsValue::from_serde(&e).unwrap())?,
         };
 
         for fact in self.facts.iter() {
             authorizer
                 .add_fact(fact.clone())
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
         }
         for rule in self.rules.iter() {
             authorizer
                 .add_rule(rule.clone())
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
         }
         for check in self.checks.iter() {
             authorizer
                 .add_check(check.clone())
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
         }
         for policy in self.policies.iter() {
             authorizer
                 .add_policy(policy.clone())
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
         }
 
-        Ok(authorizer.authorize().map_err(|e| e.to_string())?)
+        Ok(authorizer
+            .authorize()
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
     }
 }
 
@@ -179,26 +196,30 @@ impl BiscuitBuilder {
         for fact in self.facts.into_iter() {
             builder
                 .add_authority_fact(fact)
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
         }
         for rule in self.rules.into_iter() {
             builder
                 .add_authority_rule(rule)
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
         }
         for check in self.checks.into_iter() {
             builder
                 .add_authority_check(check)
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
         }
 
-        Ok(Biscuit(builder.build().map_err(|e| e.to_string())?))
+        Ok(Biscuit(
+            builder
+                .build()
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+        ))
     }
 
     pub fn add_authority_fact(&mut self, fact: &str) -> Result<(), JsValue> {
         self.facts.push(
             fact.try_into()
-                .map_err(|e: biscuit::error::Token| e.to_string())?,
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
         );
         Ok(())
     }
@@ -206,7 +227,7 @@ impl BiscuitBuilder {
     pub fn add_authority_rule(&mut self, rule: &str) -> Result<(), JsValue> {
         self.rules.push(
             rule.try_into()
-                .map_err(|e: biscuit::error::Token| e.to_string())?,
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
         );
         Ok(())
     }
@@ -215,7 +236,7 @@ impl BiscuitBuilder {
         self.checks.push(
             check
                 .try_into()
-                .map_err(|e: biscuit::error::Token| e.to_string())?,
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
         );
         Ok(())
     }
@@ -230,21 +251,21 @@ impl BlockBuilder {
         Ok(self
             .0
             .add_fact(fact)
-            .map_err(|e: biscuit::error::Token| e.to_string())?)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
     }
 
     pub fn add_rule(&mut self, rule: &str) -> Result<(), JsValue> {
         Ok(self
             .0
             .add_rule(rule)
-            .map_err(|e: biscuit::error::Token| e.to_string())?)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
     }
 
     pub fn add_check(&mut self, check: &str) -> Result<(), JsValue> {
         Ok(self
             .0
             .add_check(check)
-            .map_err(|e: biscuit::error::Token| e.to_string())?)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
     }
 }
 
@@ -275,7 +296,10 @@ pub struct PublicKey(biscuit::PublicKey);
 impl PublicKey {
     pub fn to_bytes(&self, out: &mut [u8]) -> Result<(), JsValue> {
         if out.len() != 32 {
-            return Err("invalid length".into());
+            return Err(JsValue::from_serde(&biscuit::error::Token::Format(
+                biscuit::error::Format::InvalidKeySize(out.len()),
+            ))
+            .unwrap());
         }
 
         out.copy_from_slice(&self.0.to_bytes());
@@ -283,7 +307,8 @@ impl PublicKey {
     }
 
     pub fn from_bytes(&self, data: &[u8]) -> Result<PublicKey, JsValue> {
-        let key = biscuit_auth::PublicKey::from_bytes(data).map_err(|e| e.to_string())?;
+        let key = biscuit_auth::PublicKey::from_bytes(data)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?;
         Ok(PublicKey(key))
     }
 }
@@ -294,7 +319,10 @@ pub struct PrivateKey(biscuit::PrivateKey);
 impl PrivateKey {
     pub fn to_bytes(&self, out: &mut [u8]) -> Result<(), JsValue> {
         if out.len() != 32 {
-            return Err("invalid length".into());
+            return Err(JsValue::from_serde(&biscuit::error::Token::Format(
+                biscuit::error::Format::InvalidKeySize(out.len()),
+            ))
+            .unwrap());
         }
 
         out.copy_from_slice(&self.0.to_bytes());
@@ -302,7 +330,8 @@ impl PrivateKey {
     }
 
     pub fn from_bytes(&self, data: &[u8]) -> Result<PrivateKey, JsValue> {
-        let key = biscuit_auth::PrivateKey::from_bytes(data).map_err(|e| e.to_string())?;
+        let key = biscuit_auth::PrivateKey::from_bytes(data)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?;
         Ok(PrivateKey(key))
     }
 }

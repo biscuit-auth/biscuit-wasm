@@ -11,10 +11,10 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 base64 = "0.13.0"
-biscuit-auth = { version = "2.0.0-beta3", features = ["wasm"] }
+biscuit-auth = { version = "2.0.0-beta6", features = ["wasm", "serde-error"] }
 console_error_panic_hook = "0.1.7"
 log = "0.4.14"
 rand = "0.7"
-wasm-bindgen = "0.2.78"
+wasm-bindgen = {version = "0.2.78", features = ["serde-serialize"] }
 wasm-logger = "0.2.0"
 wee_alloc = "0.4.5"
