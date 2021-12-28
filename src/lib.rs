@@ -376,7 +376,7 @@ extern "C" {
 }
 
 #[wasm_bindgen(start)]
-pub fn run_app() {
+pub fn init() {
     wasm_logger::init(wasm_logger::Config::default());
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
 

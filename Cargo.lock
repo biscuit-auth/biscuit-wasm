@@ -31,13 +31,14 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
 name = "biscuit-auth"
-version = "2.0.0-beta7"
+version = "2.0.0-beta8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "284d224fa34382d1be3bfc40a6608d6b34ef1d1eeb5adfe3f9392de150bda08d"
+checksum = "f79d7723b61a6a032fae00ab8a337132d05212d0bffe74b21c45c3088613fa35"
 dependencies = [
  "base64",
  "chrono",
  "ed25519-dalek",
+ "getrandom",
  "hex",
  "nom",
  "prost",
@@ -205,8 +206,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8fc3cb4d91f53b50155bdcfd23f6a4c39ae1969c2ae85982b135750cccaf5fce"
 dependencies = [
  "cfg-if 1.0.0",
+ "js-sys",
  "libc",
  "wasi",
+ "wasm-bindgen",
 ]
 
 [[package]]
