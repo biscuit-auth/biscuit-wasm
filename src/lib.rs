@@ -139,6 +139,31 @@ impl Authorizer {
         Ok(())
     }
 
+    pub fn add_code(&mut self, source: &str) -> Result<(), JsValue> {
+        let source_result = biscuit::parser::parse_source(source).map_err(|e| {
+            let e: biscuit::error::Token = e.into();
+            JsValue::from_serde(&e).unwrap()
+        })?;
+
+        for (_, fact) in source_result.facts.into_iter() {
+            self.facts.push(fact);
+        }
+
+        for (_, rule) in source_result.rules.into_iter() {
+            self.rules.push(rule);
+        }
+
+        for (_, check) in source_result.checks.into_iter() {
+            self.checks.push(check);
+        }
+
+        for (_, policy) in source_result.policies.into_iter() {
+            self.policies.push(policy);
+        }
+
+        Ok(())
+    }
+
     pub fn authorize(&self) -> Result<usize, JsValue> {
         let mut authorizer = match &self.token {
             Some(token) => token
@@ -266,6 +291,12 @@ impl BlockBuilder {
             .0
             .add_check(check)
             .map_err(|e| JsValue::from_serde(&e).unwrap())?)
+    }
+
+    pub fn add_code(&mut self, source: &str) -> Result<(), JsValue> {
+        self.0
+            .add_code(source)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())
     }
 }
 
