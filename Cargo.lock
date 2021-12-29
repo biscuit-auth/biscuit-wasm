@@ -60,6 +60,7 @@ dependencies = [
  "base64",
  "biscuit-auth",
  "console_error_panic_hook",
+ "hex",
  "log",
  "rand",
  "wasm-bindgen",
