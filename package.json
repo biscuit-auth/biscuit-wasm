@@ -16,6 +16,7 @@
   "files": [
     "module/biscuit_bg.wasm",
     "module/biscuit.js",
+    "module/biscuit_bg.js",
     "module/biscuit.d.ts",
     "module/snippets",
     "dist/biscuit_bg.wasm",
