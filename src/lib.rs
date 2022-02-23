@@ -400,14 +400,14 @@ impl PublicKey {
     }
 
     /// Deserializes a public key from raw bytes
-    pub fn from_bytes(&self, data: &[u8]) -> Result<PublicKey, JsValue> {
+    pub fn from_bytes(data: &[u8]) -> Result<PublicKey, JsValue> {
         let key = biscuit_auth::PublicKey::from_bytes(data)
             .map_err(|e| JsValue::from_serde(&e).unwrap())?;
         Ok(PublicKey(key))
     }
 
     /// Deserializes a public key from a hexadecimal string
-    pub fn from_hex(&self, data: &str) -> Result<PublicKey, JsValue> {
+    pub fn from_hex(data: &str) -> Result<PublicKey, JsValue> {
         let data = hex::decode(data).map_err(|e| {
             JsValue::from_serde(&biscuit::error::Token::Format(
                     biscuit::error::Format::InvalidKey(format!("could not deserialize hex encoded key: {}", e)),
@@ -442,14 +442,14 @@ impl PrivateKey {
     }
 
     /// Deserializes a private key from raw bytes
-    pub fn from_bytes(&self, data: &[u8]) -> Result<PrivateKey, JsValue> {
+    pub fn from_bytes(data: &[u8]) -> Result<PrivateKey, JsValue> {
         let key = biscuit_auth::PrivateKey::from_bytes(data)
             .map_err(|e| JsValue::from_serde(&e).unwrap())?;
         Ok(PrivateKey(key))
     }
 
     /// Deserializes a private key from a hexadecimal string
-    pub fn from_hex(&self, data: &str) -> Result<PrivateKey, JsValue> {
+    pub fn from_hex(data: &str) -> Result<PrivateKey, JsValue> {
         let data = hex::decode(data).map_err(|e| {
             JsValue::from_serde(&biscuit::error::Token::Format(
                     biscuit::error::Format::InvalidKey(format!("could not deserialize hex encoded key: {}", e)),
