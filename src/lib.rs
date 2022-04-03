@@ -132,6 +132,10 @@ impl Authorizer {
         Authorizer::default()
     }
 
+    pub fn add_token(&mut self, token: Biscuit) {
+        self.token = Some(token.0);
+    }
+
     /// Adds a Datalog fact
     pub fn add_fact(&mut self, fact: &str) -> Result<(), JsValue> {
         self.facts.push(
