@@ -263,8 +263,9 @@ impl BiscuitBuilder {
         }
     }
 
-    pub fn build(self, root: &KeyPair) -> Result<Biscuit, JsValue> {
-        let mut builder = biscuit_auth::Biscuit::builder(&root.0);
+    pub fn build(self, root: &PrivateKey) -> Result<Biscuit, JsValue> {
+        let keypair = biscuit_auth::KeyPair::from(root.0.clone());
+        let mut builder = biscuit_auth::Biscuit::builder(&keypair);
         for fact in self.facts.into_iter() {
             builder
                 .add_authority_fact(fact)
