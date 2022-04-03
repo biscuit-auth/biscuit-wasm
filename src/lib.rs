@@ -137,11 +137,8 @@ impl Authorizer {
     }
 
     /// Adds a Datalog fact
-    pub fn add_fact(&mut self, fact: &str) -> Result<(), JsValue> {
-        self.facts.push(
-            fact.try_into()
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
-        );
+    pub fn add_fact(&mut self, fact: Fact) -> Result<(), JsValue> {
+        self.facts.push(fact.0);
         Ok(())
     }
 
