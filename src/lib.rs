@@ -360,6 +360,34 @@ impl BlockBuilder {
     }
 }
 
+#[wasm_bindgen]
+pub struct Fact(biscuit::builder::Fact);
+
+#[wasm_bindgen]
+impl Fact {
+    pub fn from_str(source: &str) -> Result<Fact, JsValue> {
+        source.try_into().map(Fact).map_err(|e| JsValue::from_serde(&e).unwrap())
+    }
+
+    pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
+        let value = js_to_term(value)?;
+
+        self.0.set(name, value).map_err(|e| JsValue::from_serde(&e).unwrap())
+    }
+}
+
+fn js_to_term(value: JsValue) -> Result<biscuit::builder::Term, JsValue> {
+    if let Some(b) = value.as_bool() {
+        Ok(biscuit::builder::Term::Bool(b))
+    } else if let Some(f) = value.as_f64() {
+        Ok(biscuit::builder::Term::Integer(f as i64))
+    } else if let Some(s) = value.as_string() {
+        Ok(biscuit::builder::Term::Str(s))
+    } else {
+        Err(JsValue::from_serde("unexpected value").unwrap())
+    }
+}
+
 /// A pair of public and private key
 #[wasm_bindgen]
 pub struct KeyPair(biscuit::KeyPair);
