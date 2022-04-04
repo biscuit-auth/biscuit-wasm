@@ -342,13 +342,18 @@ pub struct Fact(biscuit::builder::Fact);
 #[wasm_bindgen]
 impl Fact {
     pub fn from_str(source: &str) -> Result<Fact, JsValue> {
-        source.try_into().map(Fact).map_err(|e| JsValue::from_serde(&e).unwrap())
+        source
+            .try_into()
+            .map(Fact)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())
     }
 
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
         let value = js_to_term(value)?;
 
-        self.0.set(name, value).map_err(|e| JsValue::from_serde(&e).unwrap())
+        self.0
+            .set(name, value)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())
     }
 }
 
@@ -358,13 +363,18 @@ pub struct Rule(biscuit::builder::Rule);
 #[wasm_bindgen]
 impl Rule {
     pub fn from_str(source: &str) -> Result<Rule, JsValue> {
-        source.try_into().map(Rule).map_err(|e| JsValue::from_serde(&e).unwrap())
+        source
+            .try_into()
+            .map(Rule)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())
     }
 
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
         let value = js_to_term(value)?;
 
-        self.0.set(name, value).map_err(|e| JsValue::from_serde(&e).unwrap())
+        self.0
+            .set(name, value)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())
     }
 }
 
@@ -374,13 +384,18 @@ pub struct Check(biscuit::builder::Check);
 #[wasm_bindgen]
 impl Check {
     pub fn from_str(source: &str) -> Result<Check, JsValue> {
-        source.try_into().map(Check).map_err(|e| JsValue::from_serde(&e).unwrap())
+        source
+            .try_into()
+            .map(Check)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())
     }
 
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
         let value = js_to_term(value)?;
 
-        self.0.set(name, value).map_err(|e| JsValue::from_serde(&e).unwrap())
+        self.0
+            .set(name, value)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())
     }
 }
 
@@ -390,13 +405,18 @@ pub struct Policy(biscuit::builder::Policy);
 #[wasm_bindgen]
 impl Policy {
     pub fn from_str(source: &str) -> Result<Policy, JsValue> {
-        source.try_into().map(Policy).map_err(|e| JsValue::from_serde(&e).unwrap())
+        source
+            .try_into()
+            .map(Policy)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())
     }
 
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
         let value = js_to_term(value)?;
 
-        self.0.set(name, value).map_err(|e| JsValue::from_serde(&e).unwrap())
+        self.0
+            .set(name, value)
+            .map_err(|e| JsValue::from_serde(&e).unwrap())
     }
 }
 
@@ -467,8 +487,12 @@ impl PublicKey {
     pub fn from_hex(data: &str) -> Result<PublicKey, JsValue> {
         let data = hex::decode(data).map_err(|e| {
             JsValue::from_serde(&biscuit::error::Token::Format(
-                    biscuit::error::Format::InvalidKey(format!("could not deserialize hex encoded key: {}", e)),
-                )).unwrap()
+                biscuit::error::Format::InvalidKey(format!(
+                    "could not deserialize hex encoded key: {}",
+                    e
+                )),
+            ))
+            .unwrap()
         })?;
         let key = biscuit_auth::PublicKey::from_bytes(&data)
             .map_err(|e| JsValue::from_serde(&e).unwrap())?;
@@ -509,8 +533,12 @@ impl PrivateKey {
     pub fn from_hex(data: &str) -> Result<PrivateKey, JsValue> {
         let data = hex::decode(data).map_err(|e| {
             JsValue::from_serde(&biscuit::error::Token::Format(
-                    biscuit::error::Format::InvalidKey(format!("could not deserialize hex encoded key: {}", e)),
-                )).unwrap()
+                biscuit::error::Format::InvalidKey(format!(
+                    "could not deserialize hex encoded key: {}",
+                    e
+                )),
+            ))
+            .unwrap()
         })?;
         let key = biscuit_auth::PrivateKey::from_bytes(&data)
             .map_err(|e| JsValue::from_serde(&e).unwrap())?;
