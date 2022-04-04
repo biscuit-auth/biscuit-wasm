@@ -143,23 +143,16 @@ impl Authorizer {
     }
 
     /// Adds a Datalog rule
-    pub fn add_rule(&mut self, rule: &str) -> Result<(), JsValue> {
-        self.rules.push(
-            rule.try_into()
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
-        );
+    pub fn add_rule(&mut self, rule: Rule) -> Result<(), JsValue> {
+        self.rules.push(rule.0);
         Ok(())
     }
 
     /// Adds a check
     ///
     /// All checks, from authorizer and token, must be validated to authorize the request
-    pub fn add_check(&mut self, check: &str) -> Result<(), JsValue> {
-        self.checks.push(
-            check
-                .try_into()
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
-        );
+    pub fn add_check(&mut self, check: Check) -> Result<(), JsValue> {
+        self.checks.push(check.0);
         Ok(())
     }
 
@@ -168,12 +161,8 @@ impl Authorizer {
     /// The authorizer will test all policies in order of addition and stop at the first one that
     /// matches. If it is a "deny" policy, the request fails, while with an "allow" policy, it will
     /// succeed
-    pub fn add_policy(&mut self, policy: &str) -> Result<(), JsValue> {
-        self.policies.push(
-            policy
-                .try_into()
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
-        );
+    pub fn add_policy(&mut self, policy: Policy) -> Result<(), JsValue> {
+        self.policies.push(policy.0);
         Ok(())
     }
 
@@ -287,32 +276,22 @@ impl BiscuitBuilder {
     }
 
     /// Adds a Datalog fact
-    pub fn add_authority_fact(&mut self, fact: &str) -> Result<(), JsValue> {
-        self.facts.push(
-            fact.try_into()
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
-        );
+    pub fn add_authority_fact(&mut self, fact: Fact) -> Result<(), JsValue> {
+        self.facts.push(fact.0);
         Ok(())
     }
 
     /// Adds a Datalog rule
-    pub fn add_authority_rule(&mut self, rule: &str) -> Result<(), JsValue> {
-        self.rules.push(
-            rule.try_into()
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
-        );
+    pub fn add_authority_rule(&mut self, rule: Rule) -> Result<(), JsValue> {
+        self.rules.push(rule.0);
         Ok(())
     }
 
     /// Adds a check
     ///
     /// All checks, from authorizer and token, must be validated to authorize the request
-    pub fn add_authority_check(&mut self, check: &str) -> Result<(), JsValue> {
-        self.checks.push(
-            check
-                .try_into()
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
-        );
+    pub fn add_authority_check(&mut self, check: Check) -> Result<(), JsValue> {
+        self.checks.push(check.0);
         Ok(())
     }
 }
@@ -324,28 +303,28 @@ pub struct BlockBuilder(biscuit::builder::BlockBuilder);
 #[wasm_bindgen]
 impl BlockBuilder {
     /// Adds a Datalog fact
-    pub fn add_fact(&mut self, fact: &str) -> Result<(), JsValue> {
+    pub fn add_fact(&mut self, fact: Fact) -> Result<(), JsValue> {
         Ok(self
             .0
-            .add_fact(fact)
+            .add_fact(fact.0)
             .map_err(|e| JsValue::from_serde(&e).unwrap())?)
     }
 
     /// Adds a Datalog rule
-    pub fn add_rule(&mut self, rule: &str) -> Result<(), JsValue> {
+    pub fn add_rule(&mut self, rule: Rule) -> Result<(), JsValue> {
         Ok(self
             .0
-            .add_rule(rule)
+            .add_rule(rule.0)
             .map_err(|e| JsValue::from_serde(&e).unwrap())?)
     }
 
     /// Adds a check
     ///
     /// All checks, from authorizer and token, must be validated to authorize the request
-    pub fn add_check(&mut self, check: &str) -> Result<(), JsValue> {
+    pub fn add_check(&mut self, check: Check) -> Result<(), JsValue> {
         Ok(self
             .0
-            .add_check(check)
+            .add_check(check.0)
             .map_err(|e| JsValue::from_serde(&e).unwrap())?)
     }
 
@@ -364,6 +343,54 @@ pub struct Fact(biscuit::builder::Fact);
 impl Fact {
     pub fn from_str(source: &str) -> Result<Fact, JsValue> {
         source.try_into().map(Fact).map_err(|e| JsValue::from_serde(&e).unwrap())
+    }
+
+    pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
+        let value = js_to_term(value)?;
+
+        self.0.set(name, value).map_err(|e| JsValue::from_serde(&e).unwrap())
+    }
+}
+
+#[wasm_bindgen]
+pub struct Rule(biscuit::builder::Rule);
+
+#[wasm_bindgen]
+impl Rule {
+    pub fn from_str(source: &str) -> Result<Rule, JsValue> {
+        source.try_into().map(Rule).map_err(|e| JsValue::from_serde(&e).unwrap())
+    }
+
+    pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
+        let value = js_to_term(value)?;
+
+        self.0.set(name, value).map_err(|e| JsValue::from_serde(&e).unwrap())
+    }
+}
+
+#[wasm_bindgen]
+pub struct Check(biscuit::builder::Check);
+
+#[wasm_bindgen]
+impl Check {
+    pub fn from_str(source: &str) -> Result<Check, JsValue> {
+        source.try_into().map(Check).map_err(|e| JsValue::from_serde(&e).unwrap())
+    }
+
+    pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
+        let value = js_to_term(value)?;
+
+        self.0.set(name, value).map_err(|e| JsValue::from_serde(&e).unwrap())
+    }
+}
+
+#[wasm_bindgen]
+pub struct Policy(biscuit::builder::Policy);
+
+#[wasm_bindgen]
+impl Policy {
+    pub fn from_str(source: &str) -> Result<Policy, JsValue> {
+        source.try_into().map(Policy).map_err(|e| JsValue::from_serde(&e).unwrap())
     }
 
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
