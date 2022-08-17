@@ -108,6 +108,28 @@ impl Biscuit {
             .print_block_source(index)
             .map_err(|e| JsValue::from_serde(&e).unwrap())?)
     }
+
+    /// Creates a third party request
+    pub fn third_party_request(&self) -> Result<ThirdPartyRequest, JsValue> {
+        Ok(ThirdPartyRequest(
+            self.0
+                .third_party_request()
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+        ))
+    }
+
+    /// Appends a third party block and returns a new token
+    pub fn append_third_party(
+        &self,
+        external_key: PublicKey,
+        block: ThirdPartyBlock,
+    ) -> Result<Biscuit, JsValue> {
+        Ok(Biscuit(
+            self.0
+                .append_third_party(external_key.0, block.0)
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+        ))
+    }
 }
 
 /// The Authorizer verifies a request according to its policies and the provided token
@@ -228,6 +250,103 @@ impl Authorizer {
     }
 }
 
+/// Creates a block to attenuate a token
+#[wasm_bindgen]
+pub struct ThirdPartyRequest(biscuit::ThirdPartyRequest);
+
+#[wasm_bindgen]
+impl ThirdPartyRequest {
+    /// Deserializes a third party request from raw data
+    pub fn from_bytes(data: &[u8]) -> Result<ThirdPartyRequest, JsValue> {
+        Ok(ThirdPartyRequest(
+            biscuit::ThirdPartyRequest::deserialize(data)
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+        ))
+    }
+
+    /// Deserializes a third party request from URL safe base 64 data
+    ///
+    /// This will check the signature using the root key
+    pub fn from_base64(data: &str) -> Result<ThirdPartyRequest, JsValue> {
+        Ok(ThirdPartyRequest(
+            biscuit::ThirdPartyRequest::deserialize_base64(data)
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+        ))
+    }
+
+    /// Serializes to raw data
+    pub fn to_bytes(&self) -> Result<Box<[u8]>, JsValue> {
+        Ok(self
+            .0
+            .serialize()
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?
+            .into_boxed_slice())
+    }
+
+    /// Serializes to URL safe base 64 data
+    pub fn to_base64(&self) -> Result<String, JsValue> {
+        Ok(self
+            .0
+            .serialize_base64()
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
+    }
+
+    /// creates a ThirdPartyBlock from a BlockBuilder and the
+    /// third party service's private key
+    pub fn create_block(
+        self,
+        private_key: &PrivateKey,
+        block_builder: BlockBuilder,
+    ) -> Result<ThirdPartyBlock, JsValue> {
+        Ok(ThirdPartyBlock(
+            self.0
+                .create_block(&private_key.0, block_builder.0)
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+        ))
+    }
+}
+
+#[wasm_bindgen]
+pub struct ThirdPartyBlock(biscuit::ThirdPartyBlock);
+
+#[wasm_bindgen]
+impl ThirdPartyBlock {
+    /// Deserializes a third party request from raw data
+    pub fn from_bytes(data: &[u8]) -> Result<ThirdPartyRequest, JsValue> {
+        Ok(ThirdPartyRequest(
+            biscuit::ThirdPartyRequest::deserialize(data)
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+        ))
+    }
+
+    /// Deserializes a third party request from URL safe base 64 data
+    ///
+    /// This will check the signature using the root key
+    pub fn from_base64(data: &str) -> Result<ThirdPartyRequest, JsValue> {
+        Ok(ThirdPartyRequest(
+            biscuit::ThirdPartyRequest::deserialize_base64(data)
+                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+        ))
+    }
+
+    /// Serializes to raw data
+    pub fn to_bytes(&self) -> Result<Box<[u8]>, JsValue> {
+        Ok(self
+            .0
+            .serialize()
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?
+            .into_boxed_slice())
+    }
+
+    /// Serializes to URL safe base 64 data
+    pub fn to_base64(self) -> Result<String, JsValue> {
+        Ok(self
+            .0
+            .serialize_base64()
+            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
+    }
+}
+
 /// Creates a token
 #[wasm_bindgen]
 pub struct BiscuitBuilder {
@@ -247,7 +366,7 @@ impl BiscuitBuilder {
     }
 
     pub fn build(self, root: &PrivateKey) -> Result<Biscuit, JsValue> {
-        let keypair = biscuit_auth::KeyPair::from(root.0.clone());
+        let keypair = biscuit_auth::KeyPair::from(&root.0);
         let mut builder = biscuit_auth::builder::BiscuitBuilder::new();
         for fact in self.facts.into_iter() {
             builder
