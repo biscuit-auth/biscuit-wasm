@@ -11,8 +11,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 base64 = "0.13.0"
-biscuit-auth = { version = "3.0.0-alpha1", features = ["wasm", "serde-error"], git = "https://github.com/biscuit-auth/biscuit-rust.git", rev = "68eb6e96da8122b6995052604001532bc58ffb4a" }
-biscuit-parser = { version = "0.1.0-alpha1", features = ["serde-error"], git = "https://github.com/biscuit-auth/biscuit-rust.git", rev = "68eb6e96da8122b6995052604001532bc58ffb4a" }
+biscuit-auth = { version = "3.0.0-alpha1", features = ["wasm", "serde-error"], git = "https://github.com/biscuit-auth/biscuit-rust.git", rev = "dd51007cbde3c659466c412546234cc3825c2f4d" }
+biscuit-parser = { version = "0.1.0-alpha1", features = ["serde-error"], git = "https://github.com/biscuit-auth/biscuit-rust.git", rev = "dd51007cbde3c659466c412546234cc3825c2f4d" }
 console_error_panic_hook = "0.1.7"
 hex = "0.4.3"
 log = "0.4.14"

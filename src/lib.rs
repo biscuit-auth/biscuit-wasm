@@ -53,8 +53,7 @@ impl Biscuit {
     /// This will check the signature using the root key
     pub fn from_bytes(data: &[u8], root: &PublicKey) -> Result<Biscuit, JsValue> {
         Ok(Biscuit(
-            biscuit::Biscuit::from(data, |_| root.0)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+            biscuit::Biscuit::from(data, root.0).map_err(|e| JsValue::from_serde(&e).unwrap())?,
         ))
     }
 
@@ -63,7 +62,7 @@ impl Biscuit {
     /// This will check the signature using the root key
     pub fn from_base64(data: &str, root: &PublicKey) -> Result<Biscuit, JsValue> {
         Ok(Biscuit(
-            biscuit::Biscuit::from_base64(data, |_| root.0)
+            biscuit::Biscuit::from_base64(data, root.0)
                 .map_err(|e| JsValue::from_serde(&e).unwrap())?,
         ))
     }
