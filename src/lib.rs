@@ -25,7 +25,7 @@ impl Biscuit {
         Ok(Biscuit(
             self.0
                 .append(block.0)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
@@ -44,7 +44,7 @@ impl Biscuit {
         Ok(Biscuit(
             self.0
                 .seal()
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
@@ -53,7 +53,7 @@ impl Biscuit {
     /// This will check the signature using the root key
     pub fn from_bytes(data: &[u8], root: &PublicKey) -> Result<Biscuit, JsValue> {
         Ok(Biscuit(
-            biscuit::Biscuit::from(data, root.0).map_err(|e| JsValue::from_serde(&e).unwrap())?,
+            biscuit::Biscuit::from(data, root.0).map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
@@ -63,7 +63,7 @@ impl Biscuit {
     pub fn from_base64(data: &str, root: &PublicKey) -> Result<Biscuit, JsValue> {
         Ok(Biscuit(
             biscuit::Biscuit::from_base64(data, root.0)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
@@ -72,16 +72,16 @@ impl Biscuit {
         Ok(self
             .0
             .to_vec()
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?
             .into_boxed_slice())
     }
 
     /// Serializes to URL safe base 64 data
     pub fn to_base64(&self) -> Result<String, JsValue> {
-        Ok(self
+        self
             .0
             .to_base64()
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Returns the list of revocation identifiers, encoded as URL safe base 64
@@ -102,10 +102,10 @@ impl Biscuit {
 
     /// Prints a block's content as Datalog code
     pub fn block_source(&self, index: usize) -> Result<String, JsValue> {
-        Ok(self
+        self
             .0
             .print_block_source(index)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Creates a third party request
@@ -113,7 +113,7 @@ impl Biscuit {
         Ok(ThirdPartyRequest(
             self.0
                 .third_party_request()
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
@@ -126,7 +126,7 @@ impl Biscuit {
         Ok(Biscuit(
             self.0
                 .append_third_party(external_key.0, block.0)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 }
@@ -188,7 +188,7 @@ impl Authorizer {
         let source_result = biscuit::parser::parse_source(source).map_err(|e| {
             let e2: biscuit_parser::error::LanguageError = e.into();
             let e: biscuit::error::Token = e2.into();
-            JsValue::from_serde(&e).unwrap()
+            serde_wasm_bindgen::to_value(&e).unwrap()
         })?;
 
         for (_, fact) in source_result.facts.into_iter() {
@@ -218,34 +218,34 @@ impl Authorizer {
         let mut authorizer = match &self.token {
             Some(token) => token
                 .authorizer()
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
-            None => biscuit::Authorizer::new().map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
+            None => biscuit::Authorizer::new().map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         };
 
         for fact in self.facts.iter() {
             authorizer
                 .add_fact(fact.clone())
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         }
         for rule in self.rules.iter() {
             authorizer
                 .add_rule(rule.clone())
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         }
         for check in self.checks.iter() {
             authorizer
                 .add_check(check.clone())
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         }
         for policy in self.policies.iter() {
             authorizer
                 .add_policy(policy.clone())
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         }
 
-        Ok(authorizer
+        authorizer
             .authorize()
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 }
 
@@ -259,7 +259,7 @@ impl ThirdPartyRequest {
     pub fn from_bytes(data: &[u8]) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize(data)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
@@ -269,7 +269,7 @@ impl ThirdPartyRequest {
     pub fn from_base64(data: &str) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize_base64(data)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
@@ -278,16 +278,16 @@ impl ThirdPartyRequest {
         Ok(self
             .0
             .serialize()
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?
             .into_boxed_slice())
     }
 
     /// Serializes to URL safe base 64 data
     pub fn to_base64(&self) -> Result<String, JsValue> {
-        Ok(self
+        self
             .0
             .serialize_base64()
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// creates a ThirdPartyBlock from a BlockBuilder and the
@@ -300,7 +300,7 @@ impl ThirdPartyRequest {
         Ok(ThirdPartyBlock(
             self.0
                 .create_block(&private_key.0, block_builder.0)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 }
@@ -314,7 +314,7 @@ impl ThirdPartyBlock {
     pub fn from_bytes(data: &[u8]) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize(data)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
@@ -324,7 +324,7 @@ impl ThirdPartyBlock {
     pub fn from_base64(data: &str) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize_base64(data)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
@@ -333,16 +333,16 @@ impl ThirdPartyBlock {
         Ok(self
             .0
             .serialize()
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?
             .into_boxed_slice())
     }
 
     /// Serializes to URL safe base 64 data
     pub fn to_base64(self) -> Result<String, JsValue> {
-        Ok(self
+        self
             .0
             .serialize_base64()
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 }
 
@@ -370,23 +370,23 @@ impl BiscuitBuilder {
         for fact in self.facts.into_iter() {
             builder
                 .add_fact(fact)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         }
         for rule in self.rules.into_iter() {
             builder
                 .add_rule(rule)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         }
         for check in self.checks.into_iter() {
             builder
                 .add_check(check)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?;
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         }
 
         Ok(Biscuit(
             builder
                 .build(&keypair)
-                .map_err(|e| JsValue::from_serde(&e).unwrap())?,
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
@@ -426,35 +426,35 @@ impl BlockBuilder {
 
     /// Adds a Datalog fact
     pub fn add_fact(&mut self, fact: Fact) -> Result<(), JsValue> {
-        Ok(self
+        self
             .0
             .add_fact(fact.0)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds a Datalog rule
     pub fn add_rule(&mut self, rule: Rule) -> Result<(), JsValue> {
-        Ok(self
+        self
             .0
             .add_rule(rule.0)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds a check
     ///
     /// All checks, from authorizer and token, must be validated to authorize the request
     pub fn add_check(&mut self, check: Check) -> Result<(), JsValue> {
-        Ok(self
+        self
             .0
             .add_check(check.0)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds facts, rules, checks and policies as one code block
     pub fn add_code(&mut self, source: &str) -> Result<(), JsValue> {
         self.0
             .add_code(source)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 }
 
@@ -467,7 +467,7 @@ impl Fact {
         source
             .try_into()
             .map(Fact)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
@@ -475,7 +475,7 @@ impl Fact {
 
         self.0
             .set(name, value)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 }
 
@@ -488,7 +488,7 @@ impl Rule {
         source
             .try_into()
             .map(Rule)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
@@ -496,7 +496,7 @@ impl Rule {
 
         self.0
             .set(name, value)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 }
 
@@ -509,7 +509,7 @@ impl Check {
         source
             .try_into()
             .map(Check)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
@@ -517,7 +517,7 @@ impl Check {
 
         self.0
             .set(name, value)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 }
 
@@ -530,7 +530,7 @@ impl Policy {
         source
             .try_into()
             .map(Policy)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
@@ -538,7 +538,7 @@ impl Policy {
 
         self.0
             .set(name, value)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 }
 
@@ -550,7 +550,7 @@ fn js_to_term(value: JsValue) -> Result<biscuit::builder::Term, JsValue> {
     } else if let Some(s) = value.as_string() {
         Ok(biscuit::builder::Term::Str(s))
     } else {
-        Err(JsValue::from_serde("unexpected value").unwrap())
+        Err(serde_wasm_bindgen::to_value("unexpected value").unwrap())
     }
 }
 
@@ -583,7 +583,7 @@ impl PublicKey {
     /// Serializes a public key to raw bytes
     pub fn to_bytes(&self, out: &mut [u8]) -> Result<(), JsValue> {
         if out.len() != 32 {
-            return Err(JsValue::from_serde(&biscuit::error::Token::Format(
+            return Err(serde_wasm_bindgen::to_value(&biscuit::error::Token::Format(
                 biscuit::error::Format::InvalidKeySize(out.len()),
             ))
             .unwrap());
@@ -601,14 +601,14 @@ impl PublicKey {
     /// Deserializes a public key from raw bytes
     pub fn from_bytes(data: &[u8]) -> Result<PublicKey, JsValue> {
         let key = biscuit_auth::PublicKey::from_bytes(data)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?;
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         Ok(PublicKey(key))
     }
 
     /// Deserializes a public key from a hexadecimal string
     pub fn from_hex(data: &str) -> Result<PublicKey, JsValue> {
         let data = hex::decode(data).map_err(|e| {
-            JsValue::from_serde(&biscuit::error::Token::Format(
+            serde_wasm_bindgen::to_value(&biscuit::error::Token::Format(
                 biscuit::error::Format::InvalidKey(format!(
                     "could not deserialize hex encoded key: {}",
                     e
@@ -617,7 +617,7 @@ impl PublicKey {
             .unwrap()
         })?;
         let key = biscuit_auth::PublicKey::from_bytes(&data)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?;
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         Ok(PublicKey(key))
     }
 }
@@ -629,7 +629,7 @@ impl PrivateKey {
     /// Serializes a private key to raw bytes
     pub fn to_bytes(&self, out: &mut [u8]) -> Result<(), JsValue> {
         if out.len() != 32 {
-            return Err(JsValue::from_serde(&biscuit::error::Token::Format(
+            return Err(serde_wasm_bindgen::to_value(&biscuit::error::Token::Format(
                 biscuit::error::Format::InvalidKeySize(out.len()),
             ))
             .unwrap());
@@ -647,14 +647,14 @@ impl PrivateKey {
     /// Deserializes a private key from raw bytes
     pub fn from_bytes(data: &[u8]) -> Result<PrivateKey, JsValue> {
         let key = biscuit_auth::PrivateKey::from_bytes(data)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?;
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         Ok(PrivateKey(key))
     }
 
     /// Deserializes a private key from a hexadecimal string
     pub fn from_hex(data: &str) -> Result<PrivateKey, JsValue> {
         let data = hex::decode(data).map_err(|e| {
-            JsValue::from_serde(&biscuit::error::Token::Format(
+            serde_wasm_bindgen::to_value(&biscuit::error::Token::Format(
                 biscuit::error::Format::InvalidKey(format!(
                     "could not deserialize hex encoded key: {}",
                     e
@@ -663,7 +663,7 @@ impl PrivateKey {
             .unwrap()
         })?;
         let key = biscuit_auth::PrivateKey::from_bytes(&data)
-            .map_err(|e| JsValue::from_serde(&e).unwrap())?;
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         Ok(PrivateKey(key))
     }
 }
