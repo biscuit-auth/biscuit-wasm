@@ -1,20 +1,15 @@
 {
   "name": "biscuit-example",
-  "version": "1.0.0",
+  "version": "0.4.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "serve": "webpack-dev-server"
+   "start": "node --experimental-specifier-resolution=node --experimental-wasm-modules index.js"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "@biscuit-auth/biscuit-wasm": "file:../.."
-  },
-  "devDependencies": {
-    "@wasm-tool/wasm-pack-plugin": "1.0.1",
-    "webpack": "^5.65.0",
-    "webpack-cli": "^4.9.1"
   }
 }
