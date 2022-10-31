@@ -565,6 +565,10 @@ impl KeyPair {
         KeyPair(biscuit::KeyPair::new())
     }
 
+    pub fn from(key: PrivateKey) -> Self {
+        KeyPair(biscuit::KeyPair::from(key.0))
+    }
+
     pub fn public(&self) -> PublicKey {
         PublicKey(self.0.public())
     }
