@@ -9,6 +9,7 @@
   },
   "author": "",
   "license": "MIT",
+  "type": "module",
   "dependencies": {
     "@biscuit-auth/biscuit-wasm": "file:../.."
   },

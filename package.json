@@ -11,26 +11,21 @@
     "build-esm": "wasm-pack build --target bundler --out-dir module --out-name biscuit --scope biscuit-auth",
     "build-cjs": "wasm-pack build --target nodejs --out-dir dist --out-name biscuit --scope biscuit-auth",
     "remove-pkg-cruft": "rm module/package.json dist/package.json dist/.gitignore module/.gitignore dist/README.md module/README.md",
-    "prepare-package": "npm run build-esm && npm run build-cjs && npm run remove-pkg-cruft && cp performance.js dist/snippets/*/inline0.js"
+    "prepare-package": "npm run build-esm && npm run remove-pkg-cruft"
   },
   "files": [
     "module/biscuit_bg.wasm",
     "module/biscuit.js",
     "module/biscuit_bg.js",
     "module/biscuit.d.ts",
-    "module/snippets",
-    "dist/biscuit_bg.wasm",
-    "dist/biscuit.js",
-    "dist/biscuit_bg.js",
-    "dist/biscuit.d.ts",
-    "dist/snippets"
+    "module/snippets"
   ],
-  "main": "dist/biscuit.js",
+  "main": "module/biscuit.js",
+  "type": "module",
   "exports": {
-    "require": "./dist/biscuit.js",
     "import": "./module/biscuit.js"
   },
   "module": "module/biscuit.js",
   "sideEffects": "false",
-  "types": "dist/biscuit.d.ts"
+  "types": "module/biscuit.d.ts"
 }
