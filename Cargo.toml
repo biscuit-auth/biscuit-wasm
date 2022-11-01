@@ -19,3 +19,4 @@ rand = "0.7"
 wasm-bindgen = {version = "0.2.78", features = ["serde-serialize"] }
 wasm-logger = "0.2.0"
 wee_alloc = "0.4.5"
+getrandom = { version = "0.2.8", features = ["js"] }

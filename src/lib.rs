@@ -440,7 +440,11 @@ pub struct KeyPair(biscuit::KeyPair);
 impl KeyPair {
     #[wasm_bindgen(constructor)]
     pub fn new() -> KeyPair {
-        KeyPair(biscuit::KeyPair::new())
+        let mut data = [0u8; 8];
+        getrandom::getrandom(&mut data[..]).unwrap();
+        let mut rng: rand::rngs::StdRng = rand::SeedableRng::seed_from_u64(u64::from_le_bytes(data));
+
+        KeyPair(biscuit::KeyPair::new_with_rng(&mut rng))
     }
 
     pub fn from(key: PrivateKey) -> Self {
