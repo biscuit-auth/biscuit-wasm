@@ -1,0 +1,20 @@
+{
+  "name": "biscuit-wasm-example",
+  "type": "module",
+  "main": "index.js",
+  "author": "Geoffroy Couprie",
+  "version": "0.3.14",
+  "scripts": {
+    "build": "webpack",
+    "start": "wds --node-resolve --open ."
+  },
+  "dependencies": {
+    "@biscuit-auth/biscuit-wasm": "file:../.."
+  },
+  "devDependencies": {
+    "webpack": "^5.4.0",
+    "webpack-cli": "^4.2.0",
+    "@web/dev-server": "^0.1.28"
+  },
+  "description": ""
+}
