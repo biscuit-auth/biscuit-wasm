@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "serve": "webpack-dev-server"
+    "start": "node --experimental-wasm-modules index.js"
   },
   "author": "",
   "license": "MIT",
