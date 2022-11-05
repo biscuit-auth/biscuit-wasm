@@ -260,6 +260,7 @@ pub struct BiscuitBuilder {
 
 #[wasm_bindgen]
 impl BiscuitBuilder {
+    #[wasm_bindgen(constructor)]
     fn new() -> BiscuitBuilder {
         BiscuitBuilder {
             facts: Vec::new(),
@@ -268,6 +269,7 @@ impl BiscuitBuilder {
         }
     }
 
+    #[wasm_bindgen(js_name = build)]
     pub fn build(self, root: &PrivateKey) -> Result<Biscuit, JsValue> {
         let keypair = biscuit_auth::KeyPair::from(root.0.clone());
         let mut builder = biscuit_auth::Biscuit::builder(&keypair);
@@ -296,12 +298,14 @@ impl BiscuitBuilder {
     }
 
     /// Adds a Datalog fact
+    #[wasm_bindgen(js_name = addAuthorityFact)]
     pub fn add_authority_fact(&mut self, fact: Fact) -> Result<(), JsValue> {
         self.facts.push(fact.0);
         Ok(())
     }
 
     /// Adds a Datalog rule
+    #[wasm_bindgen(js_name = addAuthorityRule)]
     pub fn add_authority_rule(&mut self, rule: Rule) -> Result<(), JsValue> {
         self.rules.push(rule.0);
         Ok(())
@@ -310,6 +314,7 @@ impl BiscuitBuilder {
     /// Adds a check
     ///
     /// All checks, from authorizer and token, must be validated to authorize the request
+    #[wasm_bindgen(js_name = addAuthorityCheck)]
     pub fn add_authority_check(&mut self, check: Check) -> Result<(), JsValue> {
         self.checks.push(check.0);
         Ok(())
