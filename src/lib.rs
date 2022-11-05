@@ -349,67 +349,51 @@ impl ThirdPartyBlock {
 
 /// Creates a token
 #[wasm_bindgen]
-pub struct BiscuitBuilder {
-    facts: Vec<biscuit::builder::Fact>,
-    rules: Vec<biscuit::builder::Rule>,
-    checks: Vec<biscuit::builder::Check>,
-}
+pub struct BiscuitBuilder(biscuit::builder::BiscuitBuilder);
 
 #[wasm_bindgen]
 impl BiscuitBuilder {
     fn new() -> BiscuitBuilder {
-        BiscuitBuilder {
-            facts: Vec::new(),
-            rules: Vec::new(),
-            checks: Vec::new(),
-        }
+        BiscuitBuilder(biscuit::builder::BiscuitBuilder::new())
     }
 
     pub fn build(self, root: &PrivateKey) -> Result<Biscuit, JsValue> {
         let keypair = biscuit_auth::KeyPair::from(&root.0);
-        let mut builder = biscuit_auth::builder::BiscuitBuilder::new();
-        for fact in self.facts.into_iter() {
-            builder
-                .add_fact(fact)
-                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
-        }
-        for rule in self.rules.into_iter() {
-            builder
-                .add_rule(rule)
-                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
-        }
-        for check in self.checks.into_iter() {
-            builder
-                .add_check(check)
-                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
-        }
 
         let mut rng = make_rng();
         Ok(Biscuit(
-            builder
+            self.0
                 .build_with_rng(&keypair, biscuit::datalog::SymbolTable::default(), &mut rng)
                 .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
+    /// adds the content of an existing `BlockBuilder`
+    pub fn merge(&mut self, other: BlockBuilder) {
+        self.0.merge(other.0)
+    }
+
     /// Adds a Datalog fact
     pub fn add_fact(&mut self, fact: Fact) -> Result<(), JsValue> {
-        self.facts.push(fact.0);
-        Ok(())
+        self.0
+            .add_fact(fact.0)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds a Datalog rule
     pub fn add_rule(&mut self, rule: Rule) -> Result<(), JsValue> {
-        self.rules.push(rule.0);
-        Ok(())
+        self.0
+            .add_rule(rule.0)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds a check
     ///
     /// All checks, from authorizer and token, must be validated to authorize the request
     pub fn add_check(&mut self, check: Check) -> Result<(), JsValue> {
-        self.checks.push(check.0);
-        Ok(())
+        self.0
+            .add_check(check.0)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 }
 
