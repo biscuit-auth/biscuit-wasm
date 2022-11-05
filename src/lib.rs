@@ -219,7 +219,7 @@ impl Authorizer {
             Some(token) => token
                 .authorizer()
                 .map_err(|e| JsValue::from_serde(&e).unwrap())?,
-            None => biscuit::Authorizer::new().map_err(|e| JsValue::from_serde(&e).unwrap())?,
+            None => biscuit::Authorizer::new(),
         };
 
         for fact in self.facts.iter() {
