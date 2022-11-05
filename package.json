@@ -8,10 +8,9 @@
     "url": "https://github.com/biscuit-auth/biscuit-wasm"
   },
   "scripts": {
-    "build-esm": "wasm-pack build --target bundler --out-dir module --out-name biscuit --scope biscuit-auth",
-    "build-cjs": "wasm-pack build --target nodejs --out-dir dist --out-name biscuit --scope biscuit-auth",
-    "remove-pkg-cruft": "rm module/package.json dist/package.json dist/.gitignore module/.gitignore dist/README.md module/README.md",
-    "prepare-package": "npm run build-esm && npm run remove-pkg-cruft"
+    "build": "wasm-pack build --target bundler --out-dir module --out-name biscuit --scope biscuit-auth",
+    "remove-pkg-cruft": "rm module/package.json module/.gitignore module/README.md",
+    "prepare-package": "npm run build && npm run remove-pkg-cruft"
   },
   "files": [
     "module/biscuit_bg.wasm",
