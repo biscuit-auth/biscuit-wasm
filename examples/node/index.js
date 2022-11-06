@@ -3,9 +3,6 @@ import  {Biscuit, PrivateKey, KeyPair, Fact} from '@biscuit-auth/biscuit-wasm';
 import { webcrypto } from 'node:crypto'
 globalThis.crypto = webcrypto
 
-console.log("a");
-console.log("b");
-
 let builder = Biscuit.builder();
 console.log(JSON.stringify(builder));
 

@@ -1,4 +1,7 @@
+use std::collections::HashMap;
+
 use biscuit_auth as biscuit;
+use serde::{de::Visitor, Deserialize};
 use wasm_bindgen::prelude::*;
 
 #[global_allocator]
@@ -54,7 +57,8 @@ impl Biscuit {
     /// This will check the signature using the root key
     pub fn from_bytes(data: &[u8], root: &PublicKey) -> Result<Biscuit, JsValue> {
         Ok(Biscuit(
-            biscuit::Biscuit::from(data, root.0).map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
+            biscuit::Biscuit::from(data, root.0)
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
 
@@ -395,6 +399,39 @@ impl BiscuitBuilder {
             .add_check(check.0)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
+
+    /// Adds facts, rules, checks and policies as one code block
+    pub fn add_code(&mut self, source: &str) -> Result<(), JsValue> {
+        self.0
+            .add_code(source)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
+
+    /// Adds facts, rules, checks and policies as one code block
+    pub fn add_code_with_parameters(
+        &mut self,
+        source: &str,
+        parameters: JsValue,
+        scope_parameters: JsValue,
+    ) -> Result<(), JsValue> {
+        let parameters: HashMap<String, Term> = serde_wasm_bindgen::from_value(parameters).unwrap();
+
+        let parameters = parameters
+            .into_iter()
+            .map(|(k, t)| (k, t.0))
+            .collect::<HashMap<_, _>>();
+
+        let scope_parameters: HashMap<String, PublicKey> =
+            serde_wasm_bindgen::from_value(scope_parameters).unwrap();
+        let scope_parameters = scope_parameters
+            .into_iter()
+            .map(|(k, p)| (k, p.0))
+            .collect::<HashMap<_, _>>();
+
+        self.0
+            .add_code_with_params(source, parameters, scope_parameters)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
 }
 
 /// Creates a block to attenuate a token
@@ -440,6 +477,32 @@ impl BlockBuilder {
     pub fn add_code(&mut self, source: &str) -> Result<(), JsValue> {
         self.0
             .add_code(source)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
+
+    /// Adds facts, rules, checks and policies as one code block
+    pub fn add_code_with_parameters(
+        &mut self,
+        source: &str,
+        parameters: JsValue,
+        scope_parameters: JsValue,
+    ) -> Result<(), JsValue> {
+        let parameters: HashMap<String, Term> = serde_wasm_bindgen::from_value(parameters).unwrap();
+
+        let parameters = parameters
+            .into_iter()
+            .map(|(k, t)| (k, t.0))
+            .collect::<HashMap<_, _>>();
+
+        let scope_parameters: HashMap<String, PublicKey> =
+            serde_wasm_bindgen::from_value(scope_parameters).unwrap();
+        let scope_parameters = scope_parameters
+            .into_iter()
+            .map(|(k, p)| (k, p.0))
+            .collect::<HashMap<_, _>>();
+
+        self.0
+            .add_code_with_params(source, parameters, scope_parameters)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 }
@@ -529,14 +592,49 @@ impl Policy {
 }
 
 fn js_to_term(value: JsValue) -> Result<biscuit::builder::Term, JsValue> {
-    if let Some(b) = value.as_bool() {
-        Ok(biscuit::builder::Term::Bool(b))
-    } else if let Some(f) = value.as_f64() {
-        Ok(biscuit::builder::Term::Integer(f as i64))
-    } else if let Some(s) = value.as_string() {
-        Ok(biscuit::builder::Term::Str(s))
-    } else {
-        Err(serde_wasm_bindgen::to_value("unexpected value").unwrap())
+    serde_wasm_bindgen::from_value(value)
+        .map(|t: Term| t.0)
+        .map_err(|e| serde_wasm_bindgen::to_value(&e.to_string()).unwrap())
+}
+
+struct Term(biscuit::builder::Term);
+
+impl<'de> Deserialize<'de> for Term {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_any(TermVisitor)
+    }
+}
+
+struct TermVisitor;
+
+impl<'de> Visitor<'de> for TermVisitor {
+    type Value = Term;
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("a datalog term")
+    }
+
+    fn visit_bool<E>(self, v: bool) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Term(biscuit::builder::boolean(v)))
+    }
+
+    fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Term(biscuit::builder::int(value)))
+    }
+
+    fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Term(biscuit::builder::Term::Str(v)))
     }
 }
 
@@ -612,6 +710,51 @@ impl PublicKey {
         Ok(PublicKey(key))
     }
 }
+
+impl<'de> Deserialize<'de> for PublicKey {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_any(PublicKeyVisitor)
+    }
+}
+
+struct PublicKeyVisitor;
+
+impl<'de> Visitor<'de> for PublicKeyVisitor {
+    type Value = PublicKey;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("a public key")
+    }
+
+    fn visit_string<E>(self, s: String) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match s.strip_prefix("ed25519/") {
+            None => Err(E::custom(
+                "expected a public key of the format `ed25519/<hex>`".to_string(),
+            )),
+            Some(s) => match biscuit::PublicKey::from_bytes_hex(s) {
+                Ok(pk) => Ok(PublicKey(pk)),
+                Err(e) => Err(E::custom(format!(
+                    "could not parse public key: {}",
+                    e.to_string()
+                ))),
+            },
+        }
+    }
+
+    /*fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>,
+    {
+        panic!("key: {:?}", map.next_key::<String>())
+    }*/
+}
+
 #[wasm_bindgen]
 pub struct PrivateKey(biscuit::PrivateKey);
 
