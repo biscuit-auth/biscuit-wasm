@@ -1,8 +1,5 @@
 import  {Biscuit, PrivateKey, KeyPair, Fact} from '@biscuit-auth/biscuit-wasm';
 
-console.log("a");
-console.log("b");
-
 let builder = Biscuit.builder();
 console.log(JSON.stringify(builder));
 
