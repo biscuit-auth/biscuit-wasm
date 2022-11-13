@@ -377,7 +377,7 @@ pub struct BiscuitBuilder(biscuit::builder::BiscuitBuilder);
 #[wasm_bindgen]
 impl BiscuitBuilder {
     #[wasm_bindgen(constructor)]
-    fn new() -> BiscuitBuilder {
+    pub fn new() -> BiscuitBuilder {
         BiscuitBuilder(biscuit::builder::BiscuitBuilder::new())
     }
 
