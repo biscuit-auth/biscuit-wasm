@@ -206,7 +206,7 @@ impl Authorizer {
     }
 
     /// Adds facts, rules, checks and policies as one code block
-    #[wasm_bindgen(js_name = addBlock)]
+    #[wasm_bindgen(js_name = addCode)]
     pub fn add_code(&mut self, source: &str) -> Result<(), JsValue> {
         let source_result = biscuit::parser::parse_source(source).map_err(|e| {
             let e2: biscuit_parser::error::LanguageError = e.into();
@@ -513,7 +513,7 @@ impl BlockBuilder {
     }
 
     /// Adds facts, rules, checks and policies as one code block
-    #[wasm_bindgen(js_name = addBlock)]
+    #[wasm_bindgen(js_name = addCode)]
     pub fn add_code(&mut self, source: &str) -> Result<(), JsValue> {
         self.0
             .add_code(source)
@@ -521,6 +521,7 @@ impl BlockBuilder {
     }
 
     /// Adds facts, rules, checks and policies as one code block
+    #[wasm_bindgen(js_name = addCodeWithParameters)]
     pub fn add_code_with_parameters(
         &mut self,
         source: &str,

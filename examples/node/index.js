@@ -29,7 +29,7 @@ console.log("set a parameter on a fact");
 authorizer.addFact(fact);
 console.log("added a fact to the authorizer");
 
-authorizer.addBlock("allow if user(1234); deny if true;");
+authorizer.addCode("allow if user(1234); deny if true;");
 console.log("added code to the authorizer");
 
 var policy = authorizer.authorize();
