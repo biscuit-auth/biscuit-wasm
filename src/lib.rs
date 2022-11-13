@@ -280,6 +280,7 @@ pub struct ThirdPartyRequest(biscuit::ThirdPartyRequest);
 #[wasm_bindgen]
 impl ThirdPartyRequest {
     /// Deserializes a third party request from raw data
+    #[wasm_bindgen(js_name = fromBytes)]
     pub fn from_bytes(data: &[u8]) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize(data)
@@ -290,6 +291,7 @@ impl ThirdPartyRequest {
     /// Deserializes a third party request from URL safe base 64 data
     ///
     /// This will check the signature using the root key
+    #[wasm_bindgen(js_name = fromBase64)]
     pub fn from_base64(data: &str) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize_base64(data)
@@ -298,6 +300,7 @@ impl ThirdPartyRequest {
     }
 
     /// Serializes to raw data
+    #[wasm_bindgen(js_name = toBytes)]
     pub fn to_bytes(&self) -> Result<Box<[u8]>, JsValue> {
         Ok(self
             .0
@@ -307,6 +310,7 @@ impl ThirdPartyRequest {
     }
 
     /// Serializes to URL safe base 64 data
+    #[wasm_bindgen(js_name = toBase64)]
     pub fn to_base64(&self) -> Result<String, JsValue> {
         Ok(self
             .0
@@ -316,6 +320,7 @@ impl ThirdPartyRequest {
 
     /// creates a ThirdPartyBlock from a BlockBuilder and the
     /// third party service's private key
+    #[wasm_bindgen(js_name = createBlock)]
     pub fn create_block(
         self,
         private_key: &PrivateKey,
@@ -335,6 +340,7 @@ pub struct ThirdPartyBlock(biscuit::ThirdPartyBlock);
 #[wasm_bindgen]
 impl ThirdPartyBlock {
     /// Deserializes a third party request from raw data
+    #[wasm_bindgen(js_name = fromBytes)]
     pub fn from_bytes(data: &[u8]) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize(data)
@@ -345,6 +351,7 @@ impl ThirdPartyBlock {
     /// Deserializes a third party request from URL safe base 64 data
     ///
     /// This will check the signature using the root key
+    #[wasm_bindgen(js_name = fromBase64)]
     pub fn from_base64(data: &str) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize_base64(data)
@@ -353,6 +360,7 @@ impl ThirdPartyBlock {
     }
 
     /// Serializes to raw data
+    #[wasm_bindgen(js_name = toBytes)]
     pub fn to_bytes(&self) -> Result<Box<[u8]>, JsValue> {
         Ok(self
             .0
@@ -362,6 +370,7 @@ impl ThirdPartyBlock {
     }
 
     /// Serializes to URL safe base 64 data
+    #[wasm_bindgen(js_name = toBase64)]
     pub fn to_base64(self) -> Result<String, JsValue> {
         Ok(self
             .0
@@ -469,6 +478,7 @@ impl BlockBuilder {
     /// creates a BlockBuilder
     ///
     /// the builder can then be given to the token's append method to create an attenuated token
+    #[wasm_bindgen(constructor)]
     pub fn new() -> BlockBuilder {
         BlockBuilder(biscuit::builder::BlockBuilder::new())
     }
