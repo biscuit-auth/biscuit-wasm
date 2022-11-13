@@ -801,13 +801,6 @@ impl<'de> Visitor<'de> for PublicKeyVisitor {
             },
         }
     }
-
-    /*fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
-    where
-        A: serde::de::MapAccess<'de>,
-    {
-        panic!("key: {:?}", map.next_key::<String>())
-    }*/
 }
 
 #[wasm_bindgen]
