@@ -90,10 +90,9 @@ impl Biscuit {
     /// Serializes to URL safe base 64 data
     #[wasm_bindgen(js_name = toBase64)]
     pub fn to_base64(&self) -> Result<String, JsValue> {
-        Ok(self
-            .0
+        self.0
             .to_base64()
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Returns the list of revocation identifiers, encoded as URL safe base 64
@@ -117,10 +116,9 @@ impl Biscuit {
     /// Prints a block's content as Datalog code
     #[wasm_bindgen(js_name = getBlockSource)]
     pub fn block_source(&self, index: usize) -> Result<String, JsValue> {
-        Ok(self
-            .0
+        self.0
             .print_block_source(index)
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Creates a third party request
@@ -267,9 +265,9 @@ impl Authorizer {
                 .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
         }
 
-        Ok(authorizer
+        authorizer
             .authorize()
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 }
 
@@ -312,10 +310,9 @@ impl ThirdPartyRequest {
     /// Serializes to URL safe base 64 data
     #[wasm_bindgen(js_name = toBase64)]
     pub fn to_base64(&self) -> Result<String, JsValue> {
-        Ok(self
-            .0
+        self.0
             .serialize_base64()
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// creates a ThirdPartyBlock from a BlockBuilder and the
@@ -372,10 +369,9 @@ impl ThirdPartyBlock {
     /// Serializes to URL safe base 64 data
     #[wasm_bindgen(js_name = toBase64)]
     pub fn to_base64(self) -> Result<String, JsValue> {
-        Ok(self
-            .0
+        self.0
             .serialize_base64()
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 }
 
@@ -486,19 +482,17 @@ impl BlockBuilder {
     /// Adds a Datalog fact
     #[wasm_bindgen(js_name = addFact)]
     pub fn add_fact(&mut self, fact: Fact) -> Result<(), JsValue> {
-        Ok(self
-            .0
+        self.0
             .add_fact(fact.0)
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds a Datalog rule
     #[wasm_bindgen(js_name = addRule)]
     pub fn add_rule(&mut self, rule: Rule) -> Result<(), JsValue> {
-        Ok(self
-            .0
+        self.0
             .add_rule(rule.0)
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds a check
@@ -506,10 +500,9 @@ impl BlockBuilder {
     /// All checks, from authorizer and token, must be validated to authorize the request
     #[wasm_bindgen(js_name = addCheck)]
     pub fn add_check(&mut self, check: Check) -> Result<(), JsValue> {
-        Ok(self
-            .0
+        self.0
             .add_check(check.0)
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds facts, rules, checks and policies as one code block
@@ -738,7 +731,7 @@ impl PublicKey {
     /// Serializes a public key to a hexadecimal string
     #[wasm_bindgen(js_name = toString)]
     pub fn to_hex(&self) -> String {
-        hex::encode(&self.0.to_bytes())
+        hex::encode(self.0.to_bytes())
     }
 
     /// Deserializes a public key from raw bytes
@@ -795,10 +788,7 @@ impl<'de> Visitor<'de> for PublicKeyVisitor {
             )),
             Some(s) => match biscuit::PublicKey::from_bytes_hex(s) {
                 Ok(pk) => Ok(PublicKey(pk)),
-                Err(e) => Err(E::custom(format!(
-                    "could not parse public key: {}",
-                    e.to_string()
-                ))),
+                Err(e) => Err(E::custom(format!("could not parse public key: {}", e))),
             },
         }
     }
@@ -826,7 +816,7 @@ impl PrivateKey {
     /// Serializes a private key to a hexadecimal string
     #[wasm_bindgen(js_name = toString)]
     pub fn to_hex(&self) -> String {
-        hex::encode(&self.0.to_bytes())
+        hex::encode(self.0.to_bytes())
     }
 
     /// Deserializes a private key from raw bytes
