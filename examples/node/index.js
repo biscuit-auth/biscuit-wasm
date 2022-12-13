@@ -1,4 +1,4 @@
-import  {Biscuit, PrivateKey, KeyPair, Fact} from '@biscuit-auth/biscuit-wasm';
+import  {Biscuit, PrivateKey, KeyPair, Fact, Rule} from '@biscuit-auth/biscuit-wasm';
 // necessary for esm support, see https://docs.rs/getrandom/latest/getrandom/#nodejs-es-module-support
 import { webcrypto } from 'node:crypto'
 globalThis.crypto = webcrypto
@@ -34,3 +34,8 @@ console.log("added code to the authorizer");
 
 var policy = authorizer.authorize();
 console.log("policy: "+policy);
+
+var facts = authorizer.query(Rule.fromString("u($id) <- user($id)"));
+for(let f of facts) {
+  console.log(f.toString());
+}
