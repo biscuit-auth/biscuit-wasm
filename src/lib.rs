@@ -37,10 +37,11 @@ impl Biscuit {
     /// Creates an authorizer from the token
     #[wasm_bindgen(js_name = getAuthorizer)]
     pub fn authorizer(&self) -> Result<Authorizer, JsValue> {
-        Ok(Authorizer {
-            token: Some(self.0.clone()),
-            ..Authorizer::default()
-        })
+        Ok(Authorizer(
+            self.0
+                .authorizer()
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
+        ))
     }
 
     /// Seals the token
@@ -148,39 +149,40 @@ impl Biscuit {
 
 /// The Authorizer verifies a request according to its policies and the provided token
 #[wasm_bindgen]
-#[derive(Default)]
-pub struct Authorizer {
-    token: Option<biscuit::Biscuit>,
-    facts: Vec<biscuit::builder::Fact>,
-    rules: Vec<biscuit::builder::Rule>,
-    checks: Vec<biscuit::builder::Check>,
-    policies: Vec<biscuit::builder::Policy>,
-}
+//#[derive(Default)]
+pub struct Authorizer(biscuit::Authorizer);
 
 #[wasm_bindgen]
 impl Authorizer {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Authorizer {
-        Authorizer::default()
+        Authorizer(biscuit::Authorizer::new())
     }
 
     #[wasm_bindgen(js_name = addToken)]
-    pub fn add_token(&mut self, token: Biscuit) {
-        self.token = Some(token.0);
+    pub fn add_token(&mut self, token: Biscuit) -> Result<(), JsValue> {
+        Ok(self
+            .0
+            .add_token(&token.0)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
     }
 
     /// Adds a Datalog fact
     #[wasm_bindgen(js_name = addFact)]
     pub fn add_fact(&mut self, fact: Fact) -> Result<(), JsValue> {
-        self.facts.push(fact.0);
-        Ok(())
+        Ok(self
+            .0
+            .add_fact(fact.0)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
     }
 
     /// Adds a Datalog rule
     #[wasm_bindgen(js_name = addRule)]
     pub fn add_rule(&mut self, rule: Rule) -> Result<(), JsValue> {
-        self.rules.push(rule.0);
-        Ok(())
+        Ok(self
+            .0
+            .add_rule(rule.0)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
     }
 
     /// Adds a check
@@ -188,8 +190,10 @@ impl Authorizer {
     /// All checks, from authorizer and token, must be validated to authorize the request
     #[wasm_bindgen(js_name = addCheck)]
     pub fn add_check(&mut self, check: Check) -> Result<(), JsValue> {
-        self.checks.push(check.0);
-        Ok(())
+        Ok(self
+            .0
+            .add_check(check.0)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
     }
 
     /// Adds a policy
@@ -199,36 +203,19 @@ impl Authorizer {
     /// succeed
     #[wasm_bindgen(js_name = addPolicy)]
     pub fn add_policy(&mut self, policy: Policy) -> Result<(), JsValue> {
-        self.policies.push(policy.0);
-        Ok(())
+        Ok(self
+            .0
+            .add_policy(policy.0)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
     }
 
     /// Adds facts, rules, checks and policies as one code block
-    #[wasm_bindgen(js_name = addBlock)]
+    #[wasm_bindgen(js_name = addCode)]
     pub fn add_code(&mut self, source: &str) -> Result<(), JsValue> {
-        let source_result = biscuit::parser::parse_source(source).map_err(|e| {
-            let e2: biscuit_parser::error::LanguageError = e.into();
-            let e: biscuit::error::Token = e2.into();
-            serde_wasm_bindgen::to_value(&e).unwrap()
-        })?;
-
-        for (_, fact) in source_result.facts.into_iter() {
-            self.facts.push(fact.into());
-        }
-
-        for (_, rule) in source_result.rules.into_iter() {
-            self.rules.push(rule.into());
-        }
-
-        for (_, check) in source_result.checks.into_iter() {
-            self.checks.push(check.into());
-        }
-
-        for (_, policy) in source_result.policies.into_iter() {
-            self.policies.push(policy.into());
-        }
-
-        Ok(())
+        Ok(self
+            .0
+            .add_code(source)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
     }
 
     /// Runs the authorization checks and policies
@@ -236,36 +223,8 @@ impl Authorizer {
     /// Returns the index of the matching allow policy, or an error containing the matching deny
     /// policy or a list of the failing checks
     #[wasm_bindgen(js_name = authorize)]
-    pub fn authorize(&self) -> Result<usize, JsValue> {
-        let mut authorizer = match &self.token {
-            Some(token) => token
-                .authorizer()
-                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
-            None => biscuit::Authorizer::new(),
-        };
-
-        for fact in self.facts.iter() {
-            authorizer
-                .add_fact(fact.clone())
-                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
-        }
-        for rule in self.rules.iter() {
-            authorizer
-                .add_rule(rule.clone())
-                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
-        }
-        for check in self.checks.iter() {
-            authorizer
-                .add_check(check.clone())
-                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
-        }
-        for policy in self.policies.iter() {
-            authorizer
-                .add_policy(policy.clone())
-                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
-        }
-
-        authorizer
+    pub fn authorize(&mut self) -> Result<usize, JsValue> {
+        self.0
             .authorize()
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
@@ -278,6 +237,7 @@ pub struct ThirdPartyRequest(biscuit::ThirdPartyRequest);
 #[wasm_bindgen]
 impl ThirdPartyRequest {
     /// Deserializes a third party request from raw data
+    #[wasm_bindgen(js_name = fromBytes)]
     pub fn from_bytes(data: &[u8]) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize(data)
@@ -288,6 +248,7 @@ impl ThirdPartyRequest {
     /// Deserializes a third party request from URL safe base 64 data
     ///
     /// This will check the signature using the root key
+    #[wasm_bindgen(js_name = fromBase64)]
     pub fn from_base64(data: &str) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize_base64(data)
@@ -296,6 +257,7 @@ impl ThirdPartyRequest {
     }
 
     /// Serializes to raw data
+    #[wasm_bindgen(js_name = toBytes)]
     pub fn to_bytes(&self) -> Result<Box<[u8]>, JsValue> {
         Ok(self
             .0
@@ -305,6 +267,7 @@ impl ThirdPartyRequest {
     }
 
     /// Serializes to URL safe base 64 data
+    #[wasm_bindgen(js_name = toBase64)]
     pub fn to_base64(&self) -> Result<String, JsValue> {
         self.0
             .serialize_base64()
@@ -313,6 +276,7 @@ impl ThirdPartyRequest {
 
     /// creates a ThirdPartyBlock from a BlockBuilder and the
     /// third party service's private key
+    #[wasm_bindgen(js_name = createBlock)]
     pub fn create_block(
         self,
         private_key: &PrivateKey,
@@ -332,6 +296,7 @@ pub struct ThirdPartyBlock(biscuit::ThirdPartyBlock);
 #[wasm_bindgen]
 impl ThirdPartyBlock {
     /// Deserializes a third party request from raw data
+    #[wasm_bindgen(js_name = fromBytes)]
     pub fn from_bytes(data: &[u8]) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize(data)
@@ -342,6 +307,7 @@ impl ThirdPartyBlock {
     /// Deserializes a third party request from URL safe base 64 data
     ///
     /// This will check the signature using the root key
+    #[wasm_bindgen(js_name = fromBase64)]
     pub fn from_base64(data: &str) -> Result<ThirdPartyRequest, JsValue> {
         Ok(ThirdPartyRequest(
             biscuit::ThirdPartyRequest::deserialize_base64(data)
@@ -350,6 +316,7 @@ impl ThirdPartyBlock {
     }
 
     /// Serializes to raw data
+    #[wasm_bindgen(js_name = toBytes)]
     pub fn to_bytes(&self) -> Result<Box<[u8]>, JsValue> {
         Ok(self
             .0
@@ -359,6 +326,7 @@ impl ThirdPartyBlock {
     }
 
     /// Serializes to URL safe base 64 data
+    #[wasm_bindgen(js_name = toBase64)]
     pub fn to_base64(self) -> Result<String, JsValue> {
         self.0
             .serialize_base64()
@@ -465,6 +433,7 @@ impl BlockBuilder {
     /// creates a BlockBuilder
     ///
     /// the builder can then be given to the token's append method to create an attenuated token
+    #[wasm_bindgen(constructor)]
     pub fn new() -> BlockBuilder {
         BlockBuilder(biscuit::builder::BlockBuilder::new())
     }
@@ -496,7 +465,7 @@ impl BlockBuilder {
     }
 
     /// Adds facts, rules, checks and policies as one code block
-    #[wasm_bindgen(js_name = addBlock)]
+    #[wasm_bindgen(js_name = addCode)]
     pub fn add_code(&mut self, source: &str) -> Result<(), JsValue> {
         self.0
             .add_code(source)
@@ -504,6 +473,7 @@ impl BlockBuilder {
     }
 
     /// Adds facts, rules, checks and policies as one code block
+    #[wasm_bindgen(js_name = addCodeWithParameters)]
     pub fn add_code_with_parameters(
         &mut self,
         source: &str,
@@ -781,13 +751,6 @@ impl<'de> Visitor<'de> for PublicKeyVisitor {
             },
         }
     }
-
-    /*fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
-    where
-        A: serde::de::MapAccess<'de>,
-    {
-        panic!("key: {:?}", map.next_key::<String>())
-    }*/
 }
 
 #[wasm_bindgen]
