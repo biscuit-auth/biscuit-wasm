@@ -237,18 +237,17 @@ impl Authorizer {
             .query(rule.0)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
 
-        //todo!()
-        //Ok(v.into_iter().map(Fact).collect())
-        /*Ok(v.into_iter()
-        .map(Fact)
-        .map(|f| serde_wasm_bindgen::to_value(&f).unwrap())
-        .collect())*/
-        let mut facts = js_sys::Array::new();
+        let facts = js_sys::Array::new();
         for f in v.into_iter().map(Fact) {
             facts.push(&JsValue::from(f));
         }
 
         Ok(facts)
+    }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.print_world()
     }
 }
 
@@ -571,6 +570,11 @@ impl Rule {
             .set(name, value)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
+    }
 }
 
 #[wasm_bindgen]
@@ -594,6 +598,11 @@ impl Check {
             .set(name, value)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
+    }
 }
 
 #[wasm_bindgen]
@@ -616,6 +625,11 @@ impl Policy {
         self.0
             .set(name, value)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
     }
 }
 
