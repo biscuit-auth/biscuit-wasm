@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Write;
 
 use biscuit_auth as biscuit;
 use serde::{de::Visitor, Deserialize};
@@ -198,6 +199,44 @@ impl Fact {
     pub fn to_string(&self) -> String {
         self.0.to_string()
     }
+}
+
+#[wasm_bindgen(js_name = fact, variadic)]
+pub fn fact(strings: Vec<JsValue>, values: &JsValue) -> Result<Fact, JsValue> {
+    let iterator = js_sys::try_iter(values)?
+        .ok_or_else(|| "need to pass iterable JS values!")
+        .unwrap();
+
+    let values: Vec<JsValue> = iterator.into_iter().map(|v| v.unwrap()).collect();
+
+    let mut template = strings
+        .get(0)
+        .map(|s| s.as_string().expect("expected a string"))
+        .unwrap_or_default();
+
+    if strings.len() > 1 {
+        for (i, s) in (&strings[1..]).iter().enumerate() {
+            let string = s.as_string().expect("expected a string");
+            if i < values.len() {
+                write!(&mut template, "{{{i}}}{string}").unwrap();
+            } else {
+                template += &string;
+            }
+        }
+    }
+
+    let mut fact: biscuit::builder::Fact = (&template[..])
+        .try_into()
+        .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
+
+    for (i, value) in values.into_iter().enumerate() {
+        let value = js_to_term(value)?;
+
+        fact.set(&i.to_string(), value)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
+    }
+
+    Ok(Fact(fact))
 }
 
 #[wasm_bindgen]
