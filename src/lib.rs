@@ -228,6 +228,27 @@ impl Authorizer {
             .authorize()
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
+
+    /// Executes a query over the authorizer
+    #[wasm_bindgen(js_name = query)]
+    pub fn query(&mut self, rule: Rule) -> Result<js_sys::Array, JsValue> {
+        let v: Vec<biscuit::builder::Fact> = self
+            .0
+            .query(rule.0)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
+
+        let facts = js_sys::Array::new();
+        for f in v.into_iter().map(Fact) {
+            facts.push(&JsValue::from(f));
+        }
+
+        Ok(facts)
+    }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.print_world()
+    }
 }
 
 /// Creates a block to attenuate a token
@@ -521,6 +542,11 @@ impl Fact {
             .set(name, value)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
+    }
 }
 
 #[wasm_bindgen]
@@ -543,6 +569,11 @@ impl Rule {
         self.0
             .set(name, value)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
     }
 }
 
@@ -567,6 +598,11 @@ impl Check {
             .set(name, value)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
+    }
 }
 
 #[wasm_bindgen]
@@ -589,6 +625,11 @@ impl Policy {
         self.0
             .set(name, value)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
     }
 }
 
