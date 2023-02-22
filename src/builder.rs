@@ -290,7 +290,7 @@ fn js_to_term(value: JsValue) -> Result<biscuit::builder::Term, JsValue> {
         .map_err(|e| serde_wasm_bindgen::to_value(&e.to_string()).unwrap())
 }
 
-struct Term(pub(crate) biscuit::builder::Term);
+pub struct Term(pub(crate) biscuit::builder::Term);
 
 impl<'de> Deserialize<'de> for Term {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
