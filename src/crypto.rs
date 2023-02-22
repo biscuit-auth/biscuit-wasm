@@ -56,6 +56,12 @@ impl PublicKey {
         hex::encode(self.0.to_bytes())
     }
 
+    /// Serializes a public key to a string usable as a datalog parameter
+    #[wasm_bindgen(js_name = toDatalogParameter)]
+    pub fn to_datalog_parameter(&self) -> String {
+        format!("ed25519/{}", self.to_hex())
+    }
+
     /// Deserializes a public key from raw bytes
     #[wasm_bindgen(js_name = fromBytes)]
     pub fn from_bytes(data: &[u8]) -> Result<PublicKey, JsValue> {
