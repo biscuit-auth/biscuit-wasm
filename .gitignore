@@ -1,3 +1,4 @@
 /target
 /dist
 /module
+package-lock.json
