@@ -1,14 +1,15 @@
 {
   "name": "@biscuit-auth/biscuit-wasm",
   "description": "WebAssembly wrapper for Biscuit authorization tokens",
-  "version": "0.4.0-alpha1",
+  "version": "0.4.0-alpha2",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/biscuit-auth/biscuit-wasm"
   },
   "scripts": {
-    "build": "wasm-pack build --target bundler --out-dir module --out-name biscuit --scope biscuit-auth",
+    "build": "wasm-pack build --target bundler --out-dir module --out-name biscuit --scope biscuit-auth && npm run append-snippets",
+    "append-snippets": "cat ./snippets/tagged-templates.js >> module/biscuit.js",
     "remove-pkg-cruft": "rm module/package.json module/.gitignore module/README.md",
     "prepare-package": "npm run build && npm run remove-pkg-cruft"
   },
