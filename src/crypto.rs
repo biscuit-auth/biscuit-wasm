@@ -15,7 +15,7 @@ impl KeyPair {
     }
 
     #[wasm_bindgen(js_name = fromPrivateKey)]
-    pub fn from(key: PrivateKey) -> Self {
+    pub fn from(key: &PrivateKey) -> Self {
         KeyPair(biscuit::KeyPair::from(&key.0))
     }
 
