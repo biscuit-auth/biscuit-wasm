@@ -88,6 +88,7 @@ dependencies = [
  "rand",
  "serde",
  "serde-wasm-bindgen",
+ "time",
  "wasm-bindgen",
  "wasm-logger",
  "wee_alloc",
