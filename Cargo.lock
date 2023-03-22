@@ -76,7 +76,7 @@ dependencies = [
 
 [[package]]
 name = "biscuit-wasm"
-version = "0.4.0-alpha2"
+version = "0.4.0-alpha3"
 dependencies = [
  "base64",
  "biscuit-auth",
