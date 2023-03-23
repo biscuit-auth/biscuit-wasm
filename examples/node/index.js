@@ -1,7 +1,11 @@
 import  {Biscuit, PrivateKey, KeyPair, Fact, Rule, biscuit, authorizer, block} from '@biscuit-auth/biscuit-wasm';
 // necessary for esm support, see https://docs.rs/getrandom/latest/getrandom/#nodejs-es-module-support
 import { webcrypto } from 'node:crypto'
-globalThis.crypto = webcrypto
+
+// this is not required anymore with node19+
+if(parseInt(process.version.match(/v(\d+)\.(\d+)\.(\d+)/)[1], 10) <= 18) {
+  globalThis.crypto = webcrypto
+}
 
 let keypair = new KeyPair();
 
