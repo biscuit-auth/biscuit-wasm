@@ -10,110 +10,55 @@ function prepareTerm(value) {
   }
 }
 
-export function biscuit(strings, ...values) {
-  let code = "";
-  for (let i = 0; i < strings.length; i++) {
-    code += strings[i];
-    if(i < values.length){
-      code += `{_param_${i}}`
-    } 
+function tagged(builder) {
+  return (strings, ...values) => {
+    
+    let code = "";
+    for (let i = 0; i < strings.length; i++) {
+      code += strings[i];
+      if(i < values.length){
+        code += `{_param_${i}}`
+      } 
+    }
+  
+    const termParameters = Object.fromEntries(values.map((v, i) => {
+      return [
+        `_param_${i}`,
+        prepareTerm(v)
+      ];
+    }));
+  
+    const isKeyParam = (v) => {
+      return typeof v === "string" && v.startsWith("ed25519/")  || v.toDatalogParameter;
+    };
+  
+    const keyParameters = Object.fromEntries(
+      values.map((v,i) => [i,v])
+            .filter(([i,v]) => isKeyParam(v))
+            .map(([i,v]) => {
+              return [
+                `_param_${i}`,
+                prepareTerm(v)
+              ];
+            })
+    );
+  
+    builder.addCodeWithParameters(code, termParameters, keyParameters);
+    return builder;
   }
+}
 
-  const termParameters = Object.fromEntries(values.map((v, i) => {
-    return [
-      `_param_${i}`,
-      prepareTerm(v)
-    ];
-  }));
-
-  const isKeyParam = (v) => {
-    return typeof v === "string" && v.startsWith("ed25519/")  || v.toDatalogParameter;
-  };
-
-  const keyParameters = Object.fromEntries(
-    values.map((v,i) => [i,v])
-          .filter(([i,v]) => isKeyParam(v))
-          .map(([i,v]) => {
-            return [
-              `_param_${i}`,
-              prepareTerm(v)
-            ];
-          })
-  );
-
+export function biscuit(strings, ...values) {
   const builder = Biscuit.builder();
-  builder.addCodeWithParameters(code, termParameters, keyParameters);
-  return builder;
+  return tagged(builder)(strings, ...values);
 }
 
 export function block(strings, ...values) {
-  let code = "";
-  for (let i = 0; i < strings.length; i++) {
-    code += strings[i];
-    if(i < values.length){
-      code += `{_param_${i}}`
-    } 
-  }
-
-  const termParameters = Object.fromEntries(values.map((v, i) => {
-    return [
-      `_param_${i}`,
-      prepareTerm(v)
-    ];
-  }));
-
-  const isKeyParam = (v) => {
-    return typeof v === "string" && v.startsWith("ed25519/")  || v.toDatalogParameter;
-  };
-
-  const keyParameters = Object.fromEntries(
-    values.map((v,i) => [i,v])
-          .filter(([i,v]) => isKeyParam(v))
-          .map(([i,v]) => {
-            return [
-              `_param_${i}`,
-              prepareTerm(v)
-            ];
-          })
-  );
-
   const builder = Biscuit.block_builder();
-  builder.addCodeWithParameters(code, termParameters, keyParameters);
-  return builder;
+  return tagged(builder)(strings, ...values);
 }
 
 export function authorizer(strings, ...values) {
-  let code = "";
-  for (let i = 0; i < strings.length; i++) {
-    code += strings[i];
-    if(i < values.length){
-      code += `{_param_${i}}`
-    } 
-  }
-
-  const termParameters = Object.fromEntries(values.map((v, i) => {
-    return [
-      `_param_${i}`,
-      prepareTerm(v)
-    ];
-  }));
-
-  const isKeyParam = (v) => {
-    return typeof v === "string" && v.startsWith("ed25519/")  || v.toDatalogParameter;
-  };
-
-  const keyParameters = Object.fromEntries(
-    values.map((v,i) => [i,v])
-          .filter(([i,v]) => isKeyParam(v))
-          .map(([i,v]) => {
-            return [
-              `_param_${i}`,
-              prepareTerm(v)
-            ];
-          })
-  );
-
   const builder = new Authorizer();
-  builder.addCodeWithParameters(code, termParameters, keyParameters);
-  return builder;
+  return tagged(builder)(strings, ...values);
 }
