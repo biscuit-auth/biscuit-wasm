@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use biscuit_auth as biscuit;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
-use crate::{Biscuit, Check, Fact, Policy, Rule};
+use crate::{Biscuit, Check, Fact, Policy, PublicKey, Rule, Term};
 
 /// The Authorizer verifies a request according to its policies and the provided token
 #[wasm_bindgen]
@@ -72,6 +74,33 @@ impl Authorizer {
             .0
             .add_code(source)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+    }
+
+    /// Adds facts, rules, checks and policies as one code block
+    #[wasm_bindgen(js_name = addCodeWithParameters)]
+    pub fn add_code_with_parameters(
+        &mut self,
+        source: &str,
+        parameters: JsValue,
+        scope_parameters: JsValue,
+    ) -> Result<(), JsValue> {
+        let parameters: HashMap<String, Term> = serde_wasm_bindgen::from_value(parameters).unwrap();
+
+        let parameters = parameters
+            .into_iter()
+            .map(|(k, t)| (k, t.0))
+            .collect::<HashMap<_, _>>();
+
+        let scope_parameters: HashMap<String, PublicKey> =
+            serde_wasm_bindgen::from_value(scope_parameters).unwrap();
+        let scope_parameters = scope_parameters
+            .into_iter()
+            .map(|(k, p)| (k, p.0))
+            .collect::<HashMap<_, _>>();
+
+        self.0
+            .add_code_with_params(source, parameters, scope_parameters)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Runs the authorization checks and policies

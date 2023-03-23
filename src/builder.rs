@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use biscuit_auth as biscuit;
 use serde::{de::Visitor, Deserialize};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use time::OffsetDateTime;
 
 use crate::{make_rng, Biscuit, PrivateKey, PublicKey};
 
@@ -290,7 +291,7 @@ fn js_to_term(value: JsValue) -> Result<biscuit::builder::Term, JsValue> {
         .map_err(|e| serde_wasm_bindgen::to_value(&e.to_string()).unwrap())
 }
 
-struct Term(pub(crate) biscuit::builder::Term);
+pub struct Term(pub(crate) biscuit::builder::Term);
 
 impl<'de> Deserialize<'de> for Term {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -328,5 +329,35 @@ impl<'de> Visitor<'de> for TermVisitor {
         E: serde::de::Error,
     {
         Ok(Term(biscuit::builder::Term::Str(v)))
+    }
+
+    fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Term(biscuit::builder::Term::Bytes(v.into())))
+    }
+
+    fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Term(biscuit::builder::Term::Bytes(v)))
+    }
+
+    fn visit_map<A>(self, mut v: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>
+    {
+        use serde::de::Error;
+        let (k, v): (String, String) = v.next_entry()?.ok_or_else(|| Error::invalid_length(0, &self))?;
+        match k.as_ref() {
+            "date" =>  {
+              let ts = OffsetDateTime::parse(v.as_ref(), &time::format_description::well_known::Rfc3339).map_err(|_| Error::custom("expecting a RFC3339-encoded date"))?;
+              Ok(Term(biscuit::builder::Term::Date(ts.unix_timestamp().try_into().map_err(|_| Error::custom("unix timestamp is out of range of u64"))?)))
+            }
+
+            _ => Err(Error::custom(format!("unexpected key: {}, expecting: date", &k))),
+        }
     }
 }

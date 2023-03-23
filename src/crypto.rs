@@ -15,7 +15,7 @@ impl KeyPair {
     }
 
     #[wasm_bindgen(js_name = fromPrivateKey)]
-    pub fn from(key: PrivateKey) -> Self {
+    pub fn from(key: &PrivateKey) -> Self {
         KeyPair(biscuit::KeyPair::from(&key.0))
     }
 
@@ -54,6 +54,12 @@ impl PublicKey {
     #[wasm_bindgen(js_name = toString)]
     pub fn to_hex(&self) -> String {
         hex::encode(self.0.to_bytes())
+    }
+
+    /// Serializes a public key to a string usable as a datalog parameter
+    #[wasm_bindgen(js_name = toDatalogParameter)]
+    pub fn to_datalog_parameter(&self) -> String {
+        format!("ed25519/{}", self.to_hex())
     }
 
     /// Deserializes a public key from raw bytes

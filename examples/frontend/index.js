@@ -1,33 +1,42 @@
-import  {Biscuit, PrivateKey, KeyPair, Fact} from '@biscuit-auth/biscuit-wasm';
+import  {Biscuit, PrivateKey, KeyPair, Fact, Rule, biscuit, authorizer, block} from '@biscuit-auth/biscuit-wasm';
 
-let builder = Biscuit.builder();
-console.log(JSON.stringify(builder));
-
-let priv = new KeyPair();
+let keypair = new KeyPair();
 
 let pk = PrivateKey.fromString("473b5189232f3f597b5c2f3f9b0d5e28b1ee4e7cce67ec6b7fbf5984157a6b97");
 let root = KeyPair.fromPrivateKey(pk);
 
 console.log("created the root key");
 
-let token = builder.build(root.getPrivateKey());
-console.log("created the token");
+let id = 1234;
+let biscuitBuilder = biscuit`user(${id});`;
+
+for (let right of ["read", "write"]) {
+  biscuitBuilder.merge(block`right(${right})`);
+}
+
+
+let token =
+  biscuitBuilder
+    .build(root.getPrivateKey()) // biscuit token
+    .appendBlock(block`check if user($u)`); // attenuated biscuit token
 console.log(token);
+let serializedToken = token.toBase64();
+console.log("created the token and signed it with the private key");
+console.log(serializedToken);
 
-var authorizer = token.getAuthorizer();
-console.log("created the authorizer");
+let parsedToken = Biscuit.fromBase64(serializedToken, root.getPublicKey());
+console.log("Parsed the token and verified its signatures with the public key");
 
-let fact = Fact.fromString("user({id})");
-console.log("created a fact");
+let auth = authorizer`allow if user(${id})`;
+auth.addToken(parsedToken);
 
-fact.set("id", 1234);
-console.log("set a parameter on a fact");
+let policy = auth.authorize();
+console.log("Authorized the token with the provided rules");
+console.log("matched policy: "+ policy);
 
-authorizer.addFact(fact);
-console.log("added a fact to the authorizer");
+let facts = auth.query(Rule.fromString("u($id) <- user($id)"));
+console.log("Queried the token (and the authorization context) and got the following results");
 
-authorizer.addCode("allow if user(1234); deny if true;");
-console.log("added code to the authorizer");
-
-var policy = authorizer.authorize();
-console.log("policy: "+policy);
+for(let f of facts) {
+  console.log(f.toString());
+}
