@@ -37,8 +37,13 @@ jobs:
         run: |
           npm install
           npm run prepare-package
-      - name: Run JS tests
+      - name: Run node JS example
         run: |
           cd examples/node
           npm install
           npm start
+      - name: Build frontend JS example
+        run: |
+          cd examples/frontend
+          npm install
+          npm run build
