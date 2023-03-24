@@ -33,6 +33,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: |
+      - name: Build JS lib
+        run: |
           npm install
-          npm run build
+          npm run prepare-package
+      - name: Run JS tests
+        run: |
+          cd examples/node
+          npm install
+          npm start
