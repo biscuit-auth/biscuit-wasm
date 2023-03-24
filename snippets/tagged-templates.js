@@ -1,4 +1,4 @@
-import { Biscuit, Authorizer } from "./biscuit_bg.js";
+import { Biscuit, Authorizer, Rule } from "./biscuit_bg.js";
 
 function prepareTerm(value) {
   if (value instanceof Date) {
@@ -60,4 +60,44 @@ export function block(strings, ...values) {
 export function authorizer(strings, ...values) {
   const builder = new Authorizer();
   return tagged(builder)(strings, ...values);
+}
+
+export function rule(strings, ...values) {
+  let code = "";
+  for (let i = 0; i < strings.length; i++) {
+    code += strings[i];
+    if (i < values.length) {
+      code += `{_param_${i}}`;
+    }
+  }
+
+  const termParameters = values.map((v, i) => {
+    return [`_param_${i}`, prepareTerm(v)];
+  });
+
+  const isKeyParam = (v) => {
+    return (
+      (typeof v === "string" && v.startsWith("ed25519/")) ||
+      v.toDatalogParameter
+    );
+  };
+
+  const keyParameters = values
+    .map((v, i) => [i, v])
+    .filter(([i, v]) => isKeyParam(v))
+    .map(([i, v]) => {
+      return [`_param_${i}`, prepareTerm(v)];
+    });
+
+  const r = Rule.fromString(code);
+
+  for (let p of termParameters) {
+    r.set(p[0], p[1]);
+  }
+
+  for (let p of keyParameters) {
+    r.setScope(p[0], p[1]);
+  }
+
+  return r;
 }

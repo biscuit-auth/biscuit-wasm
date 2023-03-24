@@ -19,3 +19,10 @@ export function block(strings: string[], ...values: any[]): BlockBuilder;
  * @param {any[]} values
  */
 export function authorizer(strings: string[], ...values: any[]): Authorizer;
+/**
+ * Tagged template generating a rule from datalog code
+ *
+ * @param {string[]} strings
+ * @param {any[]} values
+ */
+export function rule(strings: string[], ...values: any[]): Rule;

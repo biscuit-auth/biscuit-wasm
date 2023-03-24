@@ -223,6 +223,15 @@ impl Rule {
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
+    #[wasm_bindgen(js_name = setScope)]
+    pub fn set_scope(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
+        let value: PublicKey = serde_wasm_bindgen::from_value(value)?;
+
+        self.0
+            .set_scope_lenient(name, value.0)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
+
     #[wasm_bindgen(js_name = toString)]
     pub fn to_string(&self) -> String {
         self.0.to_string()
