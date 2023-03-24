@@ -219,7 +219,7 @@ impl Rule {
         let value = js_to_term(value)?;
 
         self.0
-            .set(name, value)
+            .set_lenient(name, value)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
