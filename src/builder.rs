@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
 use biscuit_auth as biscuit;
 use js_sys::Array;
@@ -187,6 +187,17 @@ impl Fact {
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
+    #[wasm_bindgen(js_name = unboundParameters)]
+    pub fn unbound_parameters(&self) -> Array {
+        let array = Array::new();
+        for (k, v) in self.0.parameters.as_ref().unwrap_or(&HashMap::new()) {
+            if v.is_none() {
+                array.push(&JsValue::from_str(&k));
+            }
+        }
+        array
+    }
+
     #[wasm_bindgen(js_name = set)]
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
         let value = js_to_term(value)?;
@@ -274,12 +285,57 @@ impl Check {
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
+    #[wasm_bindgen(js_name = unboundParameters)]
+    pub fn unbound_parameters(&self) -> Array {
+        let mut params = BTreeSet::new();
+        let array = Array::new();
+        for q in self.0.queries.iter() {
+            if let Some(ps) = q.parameters.as_ref() {
+                for (k, v) in ps {
+                    if v.is_none() {
+                        if params.insert(k.to_string()) {
+                            array.push(&JsValue::from_str(&k));
+                        }
+                    }
+                }
+            }
+        }
+        array
+    }
+
+    #[wasm_bindgen(js_name = unboundScopeParameters)]
+    pub fn unbound_scope_parameters(&self) -> Array {
+        let mut params = BTreeSet::new();
+        let array = Array::new();
+        for q in self.0.queries.iter() {
+            if let Some(ps) = q.scope_parameters.as_ref() {
+                for (k, v) in ps {
+                    if v.is_none() {
+                        if params.insert(k.to_string()) {
+                            array.push(&JsValue::from_str(&k));
+                        }
+                    }
+                }
+            }
+        }
+        array
+    }
+
     #[wasm_bindgen(js_name = set)]
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
         let value = js_to_term(value)?;
 
         self.0
             .set(name, value)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
+
+    #[wasm_bindgen(js_name = setScope)]
+    pub fn set_scope(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
+        let value: PublicKey = serde_wasm_bindgen::from_value(value)?;
+
+        self.0
+            .set_scope(name, value.0)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
@@ -302,12 +358,57 @@ impl Policy {
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
+    #[wasm_bindgen(js_name = unboundParameters)]
+    pub fn unbound_parameters(&self) -> Array {
+        let mut params = BTreeSet::new();
+        let array = Array::new();
+        for q in self.0.queries.iter() {
+            if let Some(ps) = q.parameters.as_ref() {
+                for (k, v) in ps {
+                    if v.is_none() {
+                        if params.insert(k.to_string()) {
+                            array.push(&JsValue::from_str(&k));
+                        }
+                    }
+                }
+            }
+        }
+        array
+    }
+
+    #[wasm_bindgen(js_name = unboundScopeParameters)]
+    pub fn unbound_scope_parameters(&self) -> Array {
+        let mut params = BTreeSet::new();
+        let array = Array::new();
+        for q in self.0.queries.iter() {
+            if let Some(ps) = q.scope_parameters.as_ref() {
+                for (k, v) in ps {
+                    if v.is_none() {
+                        if params.insert(k.to_string()) {
+                            array.push(&JsValue::from_str(&k));
+                        }
+                    }
+                }
+            }
+        }
+        array
+    }
+
     #[wasm_bindgen(js_name = set)]
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
         let value = js_to_term(value)?;
 
         self.0
             .set(name, value)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
+
+    #[wasm_bindgen(js_name = setScope)]
+    pub fn set_scope(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
+        let value: PublicKey = serde_wasm_bindgen::from_value(value)?;
+
+        self.0
+            .set_scope(name, value.0)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
