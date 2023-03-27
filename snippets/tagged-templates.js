@@ -71,32 +71,22 @@ export function rule(strings, ...values) {
     }
   }
 
-  const termParameters = values.map((v, i) => {
-    return [`_param_${i}`, prepareTerm(v)];
-  });
-
-  const isKeyParam = (v) => {
-    return (
-      (typeof v === "string" && v.startsWith("ed25519/")) ||
-      v.toDatalogParameter
-    );
-  };
-
-  const keyParameters = values
-    .map((v, i) => [i, v])
-    .filter(([i, v]) => isKeyParam(v))
-    .map(([i, v]) => {
+  const params = new Map(
+    values.map((v, i) => {
       return [`_param_${i}`, prepareTerm(v)];
-    });
+    })
+  );
 
   const r = Rule.fromString(code);
+  const unboundParams = r.unboundParameters();
+  const unboundScopeParams = r.unboundScopeParameters();
 
-  for (let p of termParameters) {
-    r.set(p[0], p[1]);
+  for (let p of unboundParams) {
+    r.set(p, params.get(p));
   }
 
-  for (let p of keyParameters) {
-    r.setScope(p[0], p[1]);
+  for (let p of unboundScopeParams) {
+    r.setScope(p, params.get(p));
   }
 
   return r;

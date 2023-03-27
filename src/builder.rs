@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use biscuit_auth as biscuit;
+use js_sys::Array;
 use serde::{de::Visitor, Deserialize};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use time::OffsetDateTime;
@@ -214,12 +215,34 @@ impl Rule {
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
+    #[wasm_bindgen(js_name = unboundParameters)]
+    pub fn unbound_parameters(&self) -> Array {
+        let array = Array::new();
+        for (k, v) in self.0.parameters.as_ref().unwrap_or(&HashMap::new()) {
+            if v.is_none() {
+                array.push(&JsValue::from_str(&k));
+            }
+        }
+        array
+    }
+
+    #[wasm_bindgen(js_name = unboundScopeParameters)]
+    pub fn unbound_scope_parameters(&self) -> Array {
+        let array = Array::new();
+        for (k, v) in self.0.scope_parameters.as_ref().unwrap_or(&HashMap::new()) {
+            if v.is_none() {
+                array.push(&JsValue::from_str(&k));
+            }
+        }
+        array
+    }
+
     #[wasm_bindgen(js_name = set)]
     pub fn set(&mut self, name: &str, value: JsValue) -> Result<(), JsValue> {
         let value = js_to_term(value)?;
 
         self.0
-            .set_lenient(name, value)
+            .set(name, value)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
@@ -228,7 +251,7 @@ impl Rule {
         let value: PublicKey = serde_wasm_bindgen::from_value(value)?;
 
         self.0
-            .set_scope_lenient(name, value.0)
+            .set_scope(name, value.0)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
