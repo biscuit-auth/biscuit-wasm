@@ -103,6 +103,12 @@ impl BiscuitBuilder {
     }
 }
 
+impl Default for BiscuitBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Creates a block to attenuate a token
 #[wasm_bindgen]
 pub struct BlockBuilder(pub(crate) biscuit::builder::BlockBuilder);
@@ -184,6 +190,12 @@ impl BlockBuilder {
     }
 }
 
+impl Default for BlockBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[wasm_bindgen]
 pub struct Fact(pub(crate) biscuit::builder::Fact);
 
@@ -202,7 +214,7 @@ impl Fact {
         let array = Array::new();
         for (k, v) in self.0.parameters.as_ref().unwrap_or(&HashMap::new()) {
             if v.is_none() {
-                array.push(&JsValue::from_str(&k));
+                array.push(&JsValue::from_str(k));
             }
         }
         array
@@ -241,7 +253,7 @@ impl Rule {
         let array = Array::new();
         for (k, v) in self.0.parameters.as_ref().unwrap_or(&HashMap::new()) {
             if v.is_none() {
-                array.push(&JsValue::from_str(&k));
+                array.push(&JsValue::from_str(k));
             }
         }
         array
@@ -252,7 +264,7 @@ impl Rule {
         let array = Array::new();
         for (k, v) in self.0.scope_parameters.as_ref().unwrap_or(&HashMap::new()) {
             if v.is_none() {
-                array.push(&JsValue::from_str(&k));
+                array.push(&JsValue::from_str(k));
             }
         }
         array
@@ -302,10 +314,8 @@ impl Check {
         for q in self.0.queries.iter() {
             if let Some(ps) = q.parameters.as_ref() {
                 for (k, v) in ps {
-                    if v.is_none() {
-                        if params.insert(k.to_string()) {
-                            array.push(&JsValue::from_str(&k));
-                        }
+                    if v.is_none() && params.insert(k.to_string()) {
+                        array.push(&JsValue::from_str(k));
                     }
                 }
             }
@@ -320,10 +330,8 @@ impl Check {
         for q in self.0.queries.iter() {
             if let Some(ps) = q.scope_parameters.as_ref() {
                 for (k, v) in ps {
-                    if v.is_none() {
-                        if params.insert(k.to_string()) {
-                            array.push(&JsValue::from_str(&k));
-                        }
+                    if v.is_none() && params.insert(k.to_string()) {
+                        array.push(&JsValue::from_str(k));
                     }
                 }
             }
@@ -375,10 +383,8 @@ impl Policy {
         for q in self.0.queries.iter() {
             if let Some(ps) = q.parameters.as_ref() {
                 for (k, v) in ps {
-                    if v.is_none() {
-                        if params.insert(k.to_string()) {
-                            array.push(&JsValue::from_str(&k));
-                        }
+                    if v.is_none() && params.insert(k.to_string()) {
+                        array.push(&JsValue::from_str(k));
                     }
                 }
             }
@@ -393,10 +399,8 @@ impl Policy {
         for q in self.0.queries.iter() {
             if let Some(ps) = q.scope_parameters.as_ref() {
                 for (k, v) in ps {
-                    if v.is_none() {
-                        if params.insert(k.to_string()) {
-                            array.push(&JsValue::from_str(&k));
-                        }
+                    if v.is_none() && params.insert(k.to_string()) {
+                        array.push(&JsValue::from_str(k));
                     }
                 }
             }
@@ -472,6 +476,13 @@ impl<'de> Visitor<'de> for TermVisitor {
         E: serde::de::Error,
     {
         Ok(Term(biscuit::builder::Term::Str(v)))
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Term(biscuit::builder::Term::Str(v.to_string())))
     }
 
     fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
