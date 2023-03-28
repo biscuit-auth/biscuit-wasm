@@ -33,6 +33,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Run rust checks
+        run: |
+          cargo clippy -- -D warnings
+          cargo fmt --check
       - name: Build JS lib
         run: |
           npm install
