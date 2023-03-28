@@ -96,6 +96,11 @@ impl BiscuitBuilder {
             .add_code_with_params(source, parameters, scope_parameters)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
+    }
 }
 
 /// Creates a block to attenuate a token
@@ -171,6 +176,11 @@ impl BlockBuilder {
         self.0
             .add_code_with_params(source, parameters, scope_parameters)
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
     }
 }
 

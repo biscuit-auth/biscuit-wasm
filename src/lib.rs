@@ -158,6 +158,11 @@ impl Biscuit {
                 .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
+    }
 }
 
 /// Creates a block to attenuate a token
