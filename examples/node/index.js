@@ -36,7 +36,11 @@ console.log("Parsed the token and verified its signatures with the public key");
 let auth = authorizer`allow if user(${id})`;
 auth.addToken(parsedToken);
 
-let policy = auth.authorize();
+let policy = auth.authorizeWithLimits({
+  max_facts: 10,
+  max_iterations: 0,
+  max_time_micro: 100
+});
 console.log("Authorized the token with the provided rules");
 console.log("matched policy: "+ policy);
 
