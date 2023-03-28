@@ -7,9 +7,17 @@ import {
   Policy,
 } from "./biscuit_bg.js";
 
-function prepareTerm(value) {
+export function bytesToHex(bytes) {
+  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+export function prepareTerm(value) {
   if (value instanceof Date) {
     return { date: value.toISOString() };
+  } else if (value instanceof Uint8Array) {
+    return { bytes: bytesToHex(value) };
+  } else if (Array.isArray(value)) {
+    return value.map(prepareTerm);
   } else if (typeof value.toDatalogParameter === "function") {
     return value.toDatalogParameter();
   } else {

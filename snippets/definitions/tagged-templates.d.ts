@@ -47,3 +47,10 @@ export function check(strings: string[], ...values: any[]): Check;
  * @param {any[]} values
  */
 export function policy(strings: string[], ...values: any[]): Policy;
+/**
+ * Adapt JS values so they can be deserialized as terms by the wasm
+ * module.
+ *
+ * @param {any} value
+ */
+export function prepareTerm(value: any): any;

@@ -485,20 +485,6 @@ impl<'de> Visitor<'de> for TermVisitor {
         Ok(Term(biscuit::builder::Term::Str(v.to_string())))
     }
 
-    fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
-    where
-        E: serde::de::Error,
-    {
-        Ok(Term(biscuit::builder::Term::Bytes(v.into())))
-    }
-
-    fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
-    where
-        E: serde::de::Error,
-    {
-        Ok(Term(biscuit::builder::Term::Bytes(v)))
-    }
-
     fn visit_map<A>(self, mut v: A) -> Result<Self::Value, A::Error>
     where
         A: serde::de::MapAccess<'de>,
@@ -520,11 +506,29 @@ impl<'de> Visitor<'de> for TermVisitor {
                         .map_err(|_| Error::custom("unix timestamp is out of range of u64"))?,
                 )))
             }
+            "bytes" => {
+                let bytes = hex::decode(v)
+                    .map_err(|_| Error::custom("expecting an hex-encoded byte array"))?;
+                Ok(Term(biscuit::builder::Term::Bytes(bytes)))
+            }
 
             _ => Err(Error::custom(format!(
                 "unexpected key: {}, expecting: date",
                 &k
             ))),
         }
+    }
+
+    fn visit_seq<A>(self, mut i: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'de>,
+    {
+        let mut set = BTreeSet::new();
+        let mut e: Option<Term> = i.next_element()?;
+        while e.is_some() {
+            set.insert(e.unwrap().0);
+            e = i.next_element()?;
+        }
+        Ok(Term(biscuit::builder::Term::Set(set)))
     }
 }
