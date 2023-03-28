@@ -119,7 +119,7 @@ impl Biscuit {
             .0
             .revocation_identifiers()
             .into_iter()
-            .map(|id| base64::encode_config(id, base64::URL_SAFE).into())
+            .map(|i| hex::encode(i).into())
             .collect();
         ids.into_boxed_slice()
     }
