@@ -19,28 +19,25 @@ impl Authorizer {
 
     #[wasm_bindgen(js_name = addToken)]
     pub fn add_token(&mut self, token: Biscuit) -> Result<(), JsValue> {
-        Ok(self
-            .0
+        self.0
             .add_token(&token.0)
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds a Datalog fact
     #[wasm_bindgen(js_name = addFact)]
     pub fn add_fact(&mut self, fact: Fact) -> Result<(), JsValue> {
-        Ok(self
-            .0
+        self.0
             .add_fact(fact.0)
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds a Datalog rule
     #[wasm_bindgen(js_name = addRule)]
     pub fn add_rule(&mut self, rule: Rule) -> Result<(), JsValue> {
-        Ok(self
-            .0
+        self.0
             .add_rule(rule.0)
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds a check
@@ -48,10 +45,9 @@ impl Authorizer {
     /// All checks, from authorizer and token, must be validated to authorize the request
     #[wasm_bindgen(js_name = addCheck)]
     pub fn add_check(&mut self, check: Check) -> Result<(), JsValue> {
-        Ok(self
-            .0
+        self.0
             .add_check(check.0)
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds a policy
@@ -61,19 +57,17 @@ impl Authorizer {
     /// succeed
     #[wasm_bindgen(js_name = addPolicy)]
     pub fn add_policy(&mut self, policy: Policy) -> Result<(), JsValue> {
-        Ok(self
-            .0
+        self.0
             .add_policy(policy.0)
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds facts, rules, checks and policies as one code block
     #[wasm_bindgen(js_name = addCode)]
     pub fn add_code(&mut self, source: &str) -> Result<(), JsValue> {
-        Ok(self
-            .0
+        self.0
             .add_code(source)
-            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds facts, rules, checks and policies as one code block
@@ -133,5 +127,11 @@ impl Authorizer {
     #[wasm_bindgen(js_name = toString)]
     pub fn to_string(&self) -> String {
         self.0.print_world()
+    }
+}
+
+impl Default for Authorizer {
+    fn default() -> Self {
+        Self::new()
     }
 }

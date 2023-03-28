@@ -21,12 +21,11 @@ for (let right of ["read", "write"]) {
   biscuitBuilder.merge(block`right(${right})`);
 }
 
-
 let token =
   biscuitBuilder
     .build(root.getPrivateKey()) // biscuit token
     .appendBlock(block`check if user($u)`); // attenuated biscuit token
-console.log(token);
+console.log(token.toString());
 let serializedToken = token.toBase64();
 console.log("created the token and signed it with the private key");
 console.log(serializedToken);

@@ -30,6 +30,12 @@ impl KeyPair {
     }
 }
 
+impl Default for KeyPair {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Public key
 #[wasm_bindgen]
 pub struct PublicKey(pub(crate) biscuit::PublicKey);
@@ -104,6 +110,13 @@ impl<'de> Visitor<'de> for PublicKeyVisitor {
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("a public key")
+    }
+
+    fn visit_str<E>(self, s: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_string(s.to_string())
     }
 
     fn visit_string<E>(self, s: String) -> Result<Self::Value, E>

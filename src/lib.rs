@@ -1,3 +1,6 @@
+// we need an explicitly defined `to_string`, and `from_str` methods
+// so that we can expose them to JS with a proper name.
+#![allow(clippy::inherent_to_string, clippy::should_implement_trait)]
 use biscuit_auth as biscuit;
 use wasm_bindgen::prelude::*;
 
@@ -157,6 +160,11 @@ impl Biscuit {
                 .append_third_party(external_key.0, block.0)
                 .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
+    }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
     }
 }
 
