@@ -1,9 +1,32 @@
 use std::collections::HashMap;
 
 use biscuit_auth as biscuit;
+use serde::Deserialize;
+use std::time::Duration;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 use crate::{Biscuit, Check, Fact, Policy, PublicKey, Rule, Term};
+
+#[derive(Deserialize)]
+pub struct RunLimits {
+    pub max_facts: Option<u64>,
+    pub max_iterations: Option<u64>,
+    pub max_time_micro: Option<u64>,
+}
+
+impl RunLimits {
+    pub fn to_rust_limits(&self) -> biscuit::datalog::RunLimits {
+        let defaults = biscuit::datalog::RunLimits::default();
+        biscuit::datalog::RunLimits {
+            max_facts: self.max_facts.unwrap_or(defaults.max_facts),
+            max_iterations: self.max_iterations.unwrap_or(defaults.max_iterations),
+            max_time: self
+                .max_time_micro
+                .map(Duration::from_micros)
+                .unwrap_or(defaults.max_time),
+        }
+    }
+}
 
 /// The Authorizer verifies a request according to its policies and the provided token
 #[wasm_bindgen]
@@ -108,12 +131,41 @@ impl Authorizer {
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
+    #[wasm_bindgen(js_name = authorizeWithLimits)]
+    pub fn authorizer_with_limits(&mut self, limits: JsValue) -> Result<usize, JsValue> {
+        let limits: RunLimits = serde_wasm_bindgen::from_value(limits)?;
+        self.0
+            .authorize_with_limits(limits.to_rust_limits())
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
+
     /// Executes a query over the authorizer
     #[wasm_bindgen(js_name = query)]
     pub fn query(&mut self, rule: Rule) -> Result<js_sys::Array, JsValue> {
         let v: Vec<biscuit::builder::Fact> = self
             .0
             .query(rule.0)
+            .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
+
+        let facts = js_sys::Array::new();
+        for f in v.into_iter().map(Fact) {
+            facts.push(&JsValue::from(f));
+        }
+
+        Ok(facts)
+    }
+
+    /// Executes a query over the authorizer
+    #[wasm_bindgen(js_name = queryWithLimits)]
+    pub fn query_with_limits(
+        &mut self,
+        rule: Rule,
+        limits: JsValue,
+    ) -> Result<js_sys::Array, JsValue> {
+        let limits: RunLimits = serde_wasm_bindgen::from_value(limits)?;
+        let v: Vec<biscuit::builder::Fact> = self
+            .0
+            .query_with_limits(rule.0, limits.to_rust_limits())
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?;
 
         let facts = js_sys::Array::new();
