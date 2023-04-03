@@ -1,0 +1,23 @@
+{
+  "name": "biscuit-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --experimental-wasm-modules index.js",
+    "test": "node --experimental-wasm-modules index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@biscuit-auth/biscuit-wasm": "file:..",
+    "tape": "^5.6.3"
+  },
+  "devDependencies": {
+    "@wasm-tool/wasm-pack-plugin": "1.0.1",
+    "nodemon": "^2.0.22",
+    "webpack": "^5.76.3",
+    "webpack-cli": "^5.0.1"
+  }
+}
