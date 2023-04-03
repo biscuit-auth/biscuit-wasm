@@ -1,3 +1,13 @@
+# `0.4.0-beta1`
+
+- CI (#25, #30) (Pierre Tondereau, Clément Delafargue)
+- `fact`, `rule`, `check`, `policy` tagged templates (#18, #24, #26) (Clément Delafargue)
+- Better `toString` implementations (#27) (Clément Delafargue)
+- Support for authorization limits (#28) (Clément Delafargue)
+- Revocation ids are now hex-encoded (#29) (Clément Delafargue)
+- Support for injecting the full range of datalog term types (#30) (Clément Delafargue)
+- Add typescript definitions for tagged templates (#25) (Clément Delafargue)
+
 # `0.4.0-alpha3`
 
 - `block` tagged template (#18) (Clément Delafargue)
