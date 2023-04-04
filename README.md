@@ -1,8 +1,8 @@
-# Biscuit-Wasm
+# Biscuit-wasm
 
 This library wraps the [Rust implementation](https://github.com/biscuit-auth) of [Biscuit tokens](https://www.biscuitsec.org) in WebAssembly, for usage in NodeJS and browsers.
 
-It provides an EcmaScript module, along with TypeScript type definitions.
+It provides both EcmaScript and CommonJS modules, along with TypeScript type definitions.
 
 ## Usage
 
@@ -11,7 +11,7 @@ Add this dependency to your `package.json`:
 ```json
 {
     "dependencies": {
-        "@biscuit-auth/biscuit-wasm": "0.4.0-alpha1"
+        "@biscuit-auth/biscuit-wasm": "0.4.0-beta1"
     }
 }
 ```
@@ -20,14 +20,18 @@ Add this dependency to your `package.json`:
 
 *see the example code in examples/node*
 
-Due to some wasm side dependencies, to work in Node, biscuit-wasm requires that this be added to the application:
+The `node` executable must be started with the [`--experimental-wasm-modules` flag](https://nodejs.org/api/esm.html#wasm-modules).
+
+#### Node 16-18
+
+Due to some wasm-side dependencies, to work in Node, biscuit-wasm requires that this be added to the application:
 
 ```javascript
 import { webcrypto } from 'node:crypto'
 globalThis.crypto = webcrypto
 ```
 
-The `node` executable must also be started with the [`--experimental-wasm-modules` flag](https://nodejs.org/api/esm.html#wasm-modules).
+This is no longer necessary starting with node 19.
 
 ### In browser
 
