@@ -155,9 +155,10 @@ impl Biscuit {
         external_key: PublicKey,
         block: ThirdPartyBlock,
     ) -> Result<Biscuit, JsValue> {
+        let next_keypair = KeyPair::new();
         Ok(Biscuit(
             self.0
-                .append_third_party(external_key.0, block.0)
+                .append_third_party_with_keypair(external_key.0, block.0, next_keypair.0)
                 .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }
