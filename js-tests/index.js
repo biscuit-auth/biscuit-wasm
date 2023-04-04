@@ -196,3 +196,56 @@ check if true trusting authority, ed25519/41e77e842e5c952a29233992dc8ebbedd2d832
   );
   t.end();
 });
+
+test("third-party blocks", function(t) {
+  let pk = PrivateKey.fromString(
+    "473b5189232f3f597b5c2f3f9b0d5e28b1ee4e7cce67ec6b7fbf5984157a6b97"
+  );
+  let root = KeyPair.fromPrivateKey(pk);
+
+  let thirdPartyPk = PrivateKey.fromString(
+    "39c657dbd3f68b09bc8e5fd9887c7cb47a91d1d3883ffbc495ca790552398a92"
+  );
+  let thirdPartyRoot = KeyPair.fromPrivateKey(thirdPartyPk);
+
+  let id = "1234";
+  let biscuitBuilder = biscuit`user(${id});`;
+
+  for (let right of ["read", "write"]) {
+    biscuitBuilder.addFact(fact`right(${right})`);
+  }
+
+  biscuitBuilder.addCheck(check`check if group("admin") trusting ${thirdPartyRoot.getPublicKey()}`);
+
+  let token = biscuitBuilder
+    .build(root.getPrivateKey()) // biscuit token
+    .appendBlock(block`check if user($u)`); // attenuated biscuit token
+
+  let thirdPartyRequest = token.getThirdPartyRequest();
+  let thirdPartyBlock = thirdPartyRequest.createBlock(
+    thirdPartyPk, block`group("admin");`
+  );
+
+  token = token.appendThirdPartyBlock(
+    thirdPartyRoot.getPublicKey(),
+    thirdPartyBlock
+  );
+  let serializedToken = token.toBase64();
+  console.log(serializedToken);
+
+  let parsedToken = Biscuit.fromBase64(serializedToken, root.getPublicKey());
+  let auth = authorizer`allow if user(${id})`;
+  auth.addToken(parsedToken);
+
+  let policy = auth.authorize();
+  t.equal(policy, 0, "authorization suceeded");
+
+  let r1 = rule`g($group) <- group($group) trusting ${thirdPartyRoot.getPublicKey()}`;
+  let facts = auth.query(r1);
+  t.equal(facts.length, 1, "correct number of query results");
+  t.equal(facts[0].toString(), `g("admin")`, "correct query result");
+
+  let r2 = rule`g($group) <- group($group) trusting authority`;
+  t.equal(auth.query(r2).length, 0, "correct number of query results");
+  t.end();
+});
