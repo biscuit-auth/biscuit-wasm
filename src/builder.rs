@@ -32,23 +32,23 @@ impl BiscuitBuilder {
     }
 
     /// adds the content of an existing `BlockBuilder`
-    pub fn merge(&mut self, other: BlockBuilder) {
-        self.0.merge(other.0)
+    pub fn merge(&mut self, other: &BlockBuilder) {
+        self.0.merge(other.0.clone())
     }
 
     /// Adds a Datalog fact
     #[wasm_bindgen(js_name = addFact)]
-    pub fn add_fact(&mut self, fact: Fact) -> Result<(), JsValue> {
+    pub fn add_fact(&mut self, fact: &Fact) -> Result<(), JsValue> {
         self.0
-            .add_fact(fact.0)
+            .add_fact(fact.0.clone())
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     /// Adds a Datalog rule
     #[wasm_bindgen(js_name = addRule)]
-    pub fn add_rule(&mut self, rule: Rule) -> Result<(), JsValue> {
+    pub fn add_rule(&mut self, rule: &Rule) -> Result<(), JsValue> {
         self.0
-            .add_rule(rule.0)
+            .add_rule(rule.0.clone())
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
@@ -56,9 +56,9 @@ impl BiscuitBuilder {
     ///
     /// All checks, from authorizer and token, must be validated to authorize the request
     #[wasm_bindgen(js_name = addCheck)]
-    pub fn add_check(&mut self, check: Check) -> Result<(), JsValue> {
+    pub fn add_check(&mut self, check: &Check) -> Result<(), JsValue> {
         self.0
-            .add_check(check.0)
+            .add_check(check.0.clone())
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
