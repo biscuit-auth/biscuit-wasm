@@ -1,13 +1,11 @@
-import  {Biscuit, PrivateKey, KeyPair, Fact, Rule, biscuit, authorizer, block, rule} from '@biscuit-auth/biscuit-wasm';
+import { Biscuit, PrivateKey, KeyPair, authorizer, biscuit, block, check, fact, rule } from '@biscuit-auth/biscuit-wasm';
 // necessary for esm support, see https://docs.rs/getrandom/latest/getrandom/#nodejs-es-module-support
 import { webcrypto } from 'node:crypto'
 
 // this is not required anymore with node19+
-if(parseInt(process.version.match(/v(\d+)\.(\d+)\.(\d+)/)[1], 10) <= 18) {
+if (parseInt(process.version.match(/v(\d+)\.(\d+)\.(\d+)/)[1], 10) <= 18) {
   globalThis.crypto = webcrypto
 }
-
-let keypair = new KeyPair();
 
 let pk = PrivateKey.fromString("473b5189232f3f597b5c2f3f9b0d5e28b1ee4e7cce67ec6b7fbf5984157a6b97");
 let root = KeyPair.fromPrivateKey(pk);
@@ -18,13 +16,30 @@ let id = 1234;
 let biscuitBuilder = biscuit`user(${id});`;
 
 for (let right of ["read", "write"]) {
-  biscuitBuilder.merge(block`right(${right})`);
+  biscuitBuilder.addFact(fact`right(${right})`);
 }
+
+let thirdPartyPk = PrivateKey.fromString(
+  "39c657dbd3f68b09bc8e5fd9887c7cb47a91d1d3883ffbc495ca790552398a92"
+);
+let thirdPartyRoot = KeyPair.fromPrivateKey(thirdPartyPk);
+biscuitBuilder.addCheck(check`check if group("admin") trusting ${thirdPartyRoot.getPublicKey()}`);
 
 let token =
   biscuitBuilder
     .build(root.getPrivateKey()) // biscuit token
     .appendBlock(block`check if user($u)`); // attenuated biscuit token
+
+let thirdPartyRequest = token.getThirdPartyRequest();
+let thirdPartyBlock = thirdPartyRequest.createBlock(
+  thirdPartyPk, block`group("admin");`
+);
+
+token = token.appendThirdPartyBlock(
+  thirdPartyRoot.getPublicKey(),
+  thirdPartyBlock
+);
+
 console.log(token.toString());
 let serializedToken = token.toBase64();
 console.log("created the token and signed it with the private key");
@@ -42,14 +57,22 @@ let policy = auth.authorizeWithLimits({
   max_time_micro: 100
 });
 console.log("Authorized the token with the provided rules");
-console.log("matched policy: "+ policy);
+console.log("matched policy: " + policy);
 
-let otherKeyPair = new KeyPair();
-let r =  rule`u($id) <- user($id), $id == ${id} trusting authority, ${otherKeyPair.getPublicKey()}`;
-console.log(r.toString());
-let facts = auth.query(r);
-console.log("Queried the token (and the authorization context) and got the following results");
+let r1 = rule`u($id) <- user($id)`;
+console.log("The token authority block & authorization context can be queried:");
+console.log(r1.toString());
+let facts1 = auth.query(r1);
+console.log(facts1.map(f => f.toString()));
 
-for(let f of facts) {
-  console.log(f.toString());
-}
+let r2 = rule`g($id) <- group($id)`;
+console.log(r2.toString());
+console.log("Blocks are not queried by default:");
+let facts2 = auth.query(r2);
+console.log(facts2.map(f => f.toString()));
+
+let r3 = rule`g($id) <- group($id) trusting ${thirdPartyRoot.getPublicKey()}`;
+console.log("Third-party blocks can be queried by providing their public key");
+console.log(r3.toString());
+let facts3 = auth.query(r3);
+console.log(facts3.map(f => f.toString()));

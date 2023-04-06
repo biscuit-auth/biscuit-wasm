@@ -16,11 +16,11 @@ import { test } from "tape";
 import { webcrypto } from 'node:crypto'
 
 // this is not required anymore with node19+
-if(parseInt(process.version.match(/v(\d+)\.(\d+)\.(\d+)/)[1], 10) <= 18) {
+if (parseInt(process.version.match(/v(\d+)\.(\d+)\.(\d+)/)[1], 10) <= 18) {
   globalThis.crypto = webcrypto
 }
 
-test("keypair generation", function (t) {
+test("keypair generation", function(t) {
   let pkStr =
     "76ac58cc933a3032d65e4d4faf99302fba381930486fd0ce1260654db25ca661";
   let pubStr =
@@ -32,7 +32,7 @@ test("keypair generation", function (t) {
   t.end();
 });
 
-test("biscuit builder", function (t) {
+test("biscuit builder", function(t) {
   let userId = "1234";
   let builder = biscuit`user(${userId});`;
   builder.addFact(fact`fact(${userId})`);
@@ -51,13 +51,12 @@ check if check("1234");
   let pkStr =
     "76ac58cc933a3032d65e4d4faf99302fba381930486fd0ce1260654db25ca661";
   let pk = PrivateKey.fromString(pkStr);
-  let root = KeyPair.fromPrivateKey(pk);
   builder.build(pk);
   t.pass("building biscuit");
   t.end();
 });
 
-test("block builder", function (t) {
+test("block builder", function(t) {
   let userId = "1234";
   let builder = block`check if user(${userId});`;
   builder.addFact(fact`fact(${userId})`);
@@ -75,7 +74,7 @@ check if check("1234");
   t.end();
 });
 
-test("authorizer builder", function (t) {
+test("authorizer builder", function(t) {
   let userId = "1234";
   let builder = authorizer`allow if user(${userId});`;
   builder.addFact(fact`fact(${userId})`);
@@ -101,7 +100,7 @@ allow if check("1234");
   t.end();
 });
 
-test("complete lifecycle", function (t) {
+test("complete lifecycle", function(t) {
   let pk = PrivateKey.fromString(
     "473b5189232f3f597b5c2f3f9b0d5e28b1ee4e7cce67ec6b7fbf5984157a6b97"
   );
@@ -194,5 +193,58 @@ check if true trusting authority, ed25519/41e77e842e5c952a29233992dc8ebbedd2d832
 `,
     "complete block"
   );
+  t.end();
+});
+
+test("third-party blocks", function(t) {
+  let pk = PrivateKey.fromString(
+    "473b5189232f3f597b5c2f3f9b0d5e28b1ee4e7cce67ec6b7fbf5984157a6b97"
+  );
+  let root = KeyPair.fromPrivateKey(pk);
+
+  let thirdPartyPk = PrivateKey.fromString(
+    "39c657dbd3f68b09bc8e5fd9887c7cb47a91d1d3883ffbc495ca790552398a92"
+  );
+  let thirdPartyRoot = KeyPair.fromPrivateKey(thirdPartyPk);
+
+  let id = "1234";
+  let biscuitBuilder = biscuit`user(${id});`;
+
+  for (let right of ["read", "write"]) {
+    biscuitBuilder.addFact(fact`right(${right})`);
+  }
+
+  biscuitBuilder.addCheck(check`check if group("admin") trusting ${thirdPartyRoot.getPublicKey()}`);
+
+  let token = biscuitBuilder
+    .build(root.getPrivateKey()) // biscuit token
+    .appendBlock(block`check if user($u)`); // attenuated biscuit token
+
+  let thirdPartyRequest = token.getThirdPartyRequest();
+  let thirdPartyBlock = thirdPartyRequest.createBlock(
+    thirdPartyPk, block`group("admin");`
+  );
+
+  token = token.appendThirdPartyBlock(
+    thirdPartyRoot.getPublicKey(),
+    thirdPartyBlock
+  );
+  let serializedToken = token.toBase64();
+  console.log(serializedToken);
+
+  let parsedToken = Biscuit.fromBase64(serializedToken, root.getPublicKey());
+  let auth = authorizer`allow if user(${id})`;
+  auth.addToken(parsedToken);
+
+  let policy = auth.authorize();
+  t.equal(policy, 0, "authorization suceeded");
+
+  let r1 = rule`g($group) <- group($group) trusting ${thirdPartyRoot.getPublicKey()}`;
+  let facts = auth.query(r1);
+  t.equal(facts.length, 1, "correct number of query results");
+  t.equal(facts[0].toString(), `g("admin")`, "correct query result");
+
+  let r2 = rule`g($group) <- group($group) trusting authority`;
+  t.equal(auth.query(r2).length, 0, "correct number of query results");
   t.end();
 });

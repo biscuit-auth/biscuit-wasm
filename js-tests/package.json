@@ -17,6 +17,8 @@
   "devDependencies": {
     "@wasm-tool/wasm-pack-plugin": "1.0.1",
     "nodemon": "^2.0.22",
+    "typescript": "^5.0.3",
+    "typescript-language-server": "^3.3.1",
     "webpack": "^5.76.3",
     "webpack-cli": "^5.0.1"
   }
