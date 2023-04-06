@@ -1,3 +1,9 @@
+# `0.4.0-beta2`
+
+- Fix `appendThirdPartyBlock` (#34) (Clément Delafargue)
+- Prevent parameter nullifying in the public API (#34) (Clément Delafargue)
+- Improve TS definitions (#34) (Pierre Tondereau)
+
 # `0.4.0-beta1`
 
 - CI (#25, #30) (Pierre Tondereau, Clément Delafargue)
