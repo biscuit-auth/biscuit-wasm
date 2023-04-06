@@ -13,7 +13,8 @@
     "check-format": "prettier -c ./snippets",
     "append-snippets": "npm run check-format && cat ./snippets/tagged-templates.js >> module/biscuit.js && cat ./snippets/definitions/tagged-templates.d.ts >> module/biscuit.d.ts",
     "remove-pkg-cruft": "rm module/package.json module/.gitignore module/README.md",
-    "prepare-package": "npm run build && npm run remove-pkg-cruft"
+    "prepare-package": "npm run build && npm run remove-pkg-cruft",
+    "prepublishOnly": "npm run prepare-package"
   },
   "files": [
     "module/biscuit_bg.wasm",
