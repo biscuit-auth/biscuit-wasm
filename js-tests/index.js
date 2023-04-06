@@ -82,6 +82,9 @@ test("authorizer builder", function(t) {
   builder.addCheck(check`check if check(${userId})`);
   builder.addPolicy(policy`allow if check(${userId})`);
 
+  builder.mergeBlock(block`check if true`);
+  builder.merge(authorizer`deny if true`);
+
   // todo maybe the authorizer builder should have a toString
   // implementation that behaves more like the ones from
   // BlockBuilder and BiscuitBuilder
@@ -90,10 +93,12 @@ test("authorizer builder", function(t) {
     `// Checks:
 // origin: authorizer
 check if check("1234");
+check if true;
 
 // Policies:
 allow if user("1234");
 allow if check("1234");
+deny if true;
 `,
     "builder roundtrip"
   );

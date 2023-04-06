@@ -1,3 +1,7 @@
+# Not released
+
+- Add `merge` and `mergeBlock` to `Authorizer` (#35) (Clément Delafargue)
+
 # `0.4.0-beta2`
 
 - Fix `appendThirdPartyBlock` (#34) (Clément Delafargue)
