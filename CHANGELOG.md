@@ -1,4 +1,4 @@
-# Not released
+# `0.4.0-beta3`
 
 - Add `merge` and `mergeBlock` to `Authorizer` (#35) (Clément Delafargue)
 - Add an express middleware for proctecting endpoints (#35) (Clément Delafargue)
