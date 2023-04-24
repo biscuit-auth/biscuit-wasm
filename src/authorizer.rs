@@ -5,7 +5,7 @@ use serde::Deserialize;
 use std::time::Duration;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
-use crate::{Biscuit, Check, Fact, Policy, PublicKey, Rule, Term};
+use crate::{Biscuit, BlockBuilder, Check, Fact, Policy, PublicKey, Rule, Term};
 
 #[derive(Deserialize)]
 pub struct RunLimits {
@@ -83,6 +83,18 @@ impl Authorizer {
         self.0
             .add_policy(policy.0.clone())
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
+    }
+
+    /// Merges the contents of another authorizer
+    #[wasm_bindgen(js_name = merge)]
+    pub fn merge(&mut self, other: &Authorizer) {
+        self.0.merge(other.0.clone())
+    }
+
+    /// Merges the contents of a block builder
+    #[wasm_bindgen(js_name = mergeBlock)]
+    pub fn merge_block(&mut self, other: &BlockBuilder) {
+        self.0.merge_block(other.0.clone())
     }
 
     /// Adds facts, rules, checks and policies as one code block

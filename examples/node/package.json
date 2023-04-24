@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node --experimental-wasm-modules index.js"
+    "start": "node --experimental-wasm-modules index.js",
+    "start-server": "node --experimental-wasm-modules express.js"
   },
   "author": "",
   "license": "MIT",
   "type": "module",
   "dependencies": {
-    "@biscuit-auth/biscuit-wasm": "file:../.."
+    "@biscuit-auth/biscuit-wasm": "file:../..",
+    "express": "^4.18.2"
   },
   "devDependencies": {
     "@wasm-tool/wasm-pack-plugin": "1.0.1",
