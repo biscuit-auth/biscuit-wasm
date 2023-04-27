@@ -1,3 +1,7 @@
+# `0.4.0`
+
+- Bump biscuit-auth to `3.1.0` (#36) (Clément Delafargue)
+
 # `0.4.0-beta3`
 
 - Add `merge` and `mergeBlock` to `Authorizer` (#35) (Clément Delafargue)
