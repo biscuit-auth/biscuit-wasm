@@ -25,9 +25,9 @@ checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
 
 [[package]]
 name = "biscuit-auth"
-version = "3.0.0"
+version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d87a1439f6aa59801e9e061cd8c0ad44fb04271aad581d948b2c690dbc0376f6"
+checksum = "47033e72ae01c3bea9385503636ba8cf54083bd52df80eccee088f806d7a0b42"
 dependencies = [
  "base64",
  "biscuit-parser",
@@ -66,9 +66,9 @@ dependencies = [
 
 [[package]]
 name = "biscuit-quote"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b82c219bdfbbb102f3899b90cae4f04599a8be392234e998b94a25296c06bf41"
+checksum = "4df264964d58df014dbbb60ce879a7194aabcc8f34cb85ff69ef68a1940a3d0b"
 dependencies = [
  "biscuit-parser",
  "proc-macro-error",
