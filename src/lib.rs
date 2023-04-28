@@ -112,7 +112,7 @@ impl Biscuit {
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
-    /// Returns the list of revocation identifiers, encoded as URL safe base 64
+    /// Returns the list of revocation identifiers, encoded as hexadecimal strings
     #[wasm_bindgen(js_name = getRevocationIdentifiers)]
     pub fn revocation_identifiers(&self) -> Box<[JsValue]> {
         let ids: Vec<_> = self
