@@ -2,12 +2,15 @@ export function middleware(options) {
   // assumes the token is in the `Authorization` header,
   // prefixed with `Bearer `
   const defaultExtractor = function (req) {
-    const authHeader = req.headers.authorization?.slice(7);
+    const authHeader = req.headers.authorization;
     if (!authHeader) {
       throw new Error("Missing Authorization header");
     }
+    if (!authHeader.startsWith("Bearer ")) {
+      throw new Error("Authorization header does not carry a bearer token");
+    }
 
-    return authHeader;
+    return authHeader.slice(7);
   };
 
   const defaultParser = function (data, publicKey) {
