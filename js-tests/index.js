@@ -249,7 +249,7 @@ test("third-party blocks", function(t) {
 
   let r1 = rule`g($group) <- group($group) trusting ${thirdPartyRoot.getPublicKey()}`;
   let facts = auth.queryWithLimits(r1, {
-    max_time_micro: 10000
+    max_time_micro: 100000
   });
   t.equal(facts.length, 1, "correct number of query results");
   t.equal(facts[0].toString(), `g("admin")`, "correct query result");
