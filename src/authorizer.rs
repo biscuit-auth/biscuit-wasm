@@ -14,7 +14,7 @@ pub struct RunLimits {
     pub max_time_micro: Option<u64>,
 }
 
-const DEFAULT_TIMEOUT: Duration = Duration::from_millis(100);
+const DEFAULT_TIMEOUT: Duration = Duration::from_millis(20);
 
 impl RunLimits {
     pub fn to_rust_limits(&self) -> biscuit::datalog::RunLimits {
