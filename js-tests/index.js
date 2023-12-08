@@ -74,6 +74,10 @@ check if check("1234");
   t.end();
 });
 
+test("root key id", function(t) {
+    t.equal(1, 0);
+});
+
 test("authorizer builder", function(t) {
   let userId = "1234";
   let builder = authorizer`allow if user(${userId});`;
