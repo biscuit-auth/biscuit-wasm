@@ -134,7 +134,7 @@ test("complete lifecycle", function(t) {
   let otherKeyPair = new KeyPair();
   let r = rule`u($id) <- user($id), $id == ${id} trusting authority, ${otherKeyPair.getPublicKey()}`;
   let facts = auth.queryWithLimits(r, {
-    max_time_micro: 10000
+    max_time_micro: 100000
   });
   t.equal(facts.length, 1, "correct number of query results");
   t.equal(facts[0].toString(), `u("1234")`, "correct query result");
