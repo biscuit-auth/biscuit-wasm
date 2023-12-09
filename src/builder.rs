@@ -36,6 +36,12 @@ impl BiscuitBuilder {
         self.0.merge(other.0.clone())
     }
 
+    /// Sets the root key id
+    #[wasm_bindgen(js_name = setRootKeyId)]
+    pub fn set_root_key_id(&mut self, root_key_id: u32) {
+        self.0.set_root_key_id(root_key_id)
+    }
+
     /// Adds a Datalog fact
     #[wasm_bindgen(js_name = addFact)]
     pub fn add_fact(&mut self, fact: &Fact) -> Result<(), JsValue> {
