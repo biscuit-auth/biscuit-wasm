@@ -38,9 +38,10 @@ test("biscuit builder", function(t) {
   builder.addFact(fact`fact(${userId})`);
   builder.addRule(rule`u($id) <- user($id, ${userId})`);
   builder.addCheck(check`check if check(${userId})`);
+  builder.setRootKeyId(1234);
   t.equal(
     builder.toString(),
-    `// no root key id set
+    `// root key id: 1234
 user("1234");
 fact("1234");
 u($id) <- user($id, "1234");
