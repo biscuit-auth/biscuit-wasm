@@ -14,6 +14,8 @@ pub struct RunLimits {
     pub max_time_micro: Option<u64>,
 }
 
+const DEFAULT_TIMEOUT: Duration = Duration::from_millis(20);
+
 impl RunLimits {
     pub fn to_rust_limits(&self) -> biscuit::datalog::RunLimits {
         let defaults = biscuit::datalog::RunLimits::default();
@@ -23,7 +25,7 @@ impl RunLimits {
             max_time: self
                 .max_time_micro
                 .map(Duration::from_micros)
-                .unwrap_or(defaults.max_time),
+                .unwrap_or(DEFAULT_TIMEOUT),
         }
     }
 }
@@ -139,12 +141,15 @@ impl Authorizer {
     #[wasm_bindgen(js_name = authorize)]
     pub fn authorize(&mut self) -> Result<usize, JsValue> {
         self.0
-            .authorize()
+            .authorize_with_limits(biscuit::datalog::RunLimits {
+                max_time: DEFAULT_TIMEOUT,
+                ..Default::default()
+            })
             .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())
     }
 
     #[wasm_bindgen(js_name = authorizeWithLimits)]
-    pub fn authorizer_with_limits(&mut self, limits: JsValue) -> Result<usize, JsValue> {
+    pub fn authorize_with_limits(&mut self, limits: JsValue) -> Result<usize, JsValue> {
         let limits: RunLimits = serde_wasm_bindgen::from_value(limits)?;
         self.0
             .authorize_with_limits(limits.to_rust_limits())
