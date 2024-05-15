@@ -6,7 +6,7 @@ use serde::{de::Visitor, Deserialize};
 use time::OffsetDateTime;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
-use crate::{make_rng, Biscuit, PrivateKey, PublicKey};
+use crate::{Biscuit, PrivateKey, PublicKey};
 
 /// Creates a token
 #[wasm_bindgen]
@@ -23,10 +23,9 @@ impl BiscuitBuilder {
     pub fn build(self, root: &PrivateKey) -> Result<Biscuit, JsValue> {
         let keypair = biscuit_auth::KeyPair::from(&root.0);
 
-        let mut rng = make_rng();
         Ok(Biscuit(
             self.0
-                .build_with_rng(&keypair, biscuit::datalog::SymbolTable::default(), &mut rng)
+                .build(&keypair)
                 .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }

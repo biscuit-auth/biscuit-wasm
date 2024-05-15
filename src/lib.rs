@@ -1,7 +1,10 @@
 // we need an explicitly defined `to_string`, and `from_str` methods
 // so that we can expose them to JS with a proper name.
 #![allow(clippy::inherent_to_string, clippy::should_implement_trait)]
+use std::collections::HashMap;
+
 use biscuit_auth as biscuit;
+use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
 mod authorizer;
@@ -14,6 +17,23 @@ pub use crypto::*;
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+#[derive(Deserialize)]
+pub struct KeyMap(HashMap<i64, PublicKey>);
+
+impl biscuit::RootKeyProvider for KeyMap {
+    fn choose(&self, key_id: Option<u32>) -> Result<biscuit::PublicKey, biscuit::error::Format> {
+        let key_id = match key_id {
+            Some(key_id) => key_id as i64,
+            None => -1,
+        };
+        self.0
+            .get(&key_id)
+            .or_else(|| self.0.get(&-1))
+            .map(|k| k.0)
+            .ok_or(biscuit::error::Format::UnknownPublicKey)
+    }
+}
 
 /// a Biscuit token
 ///
@@ -83,6 +103,18 @@ impl Biscuit {
         ))
     }
 
+    /// Deserializes a token from raw data
+    ///
+    /// This will check the signature using a public key found in the provided key map. The key passed at `-1` is used as the default key
+    #[wasm_bindgen(js_name = fromBytesWithKeyMap)]
+    pub fn from_bytes_with_key_map(data: &[u8], key_map: &JsValue) -> Result<Biscuit, JsValue> {
+        let key_map: KeyMap = serde_wasm_bindgen::from_value(key_map.clone())?;
+        Ok(Biscuit(
+            biscuit::Biscuit::from(data, key_map)
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
+        ))
+    }
+
     /// Deserializes a token from URL safe base 64 data
     ///
     /// This will check the signature using the root key
@@ -90,6 +122,18 @@ impl Biscuit {
     pub fn from_base64(data: &str, root: &PublicKey) -> Result<Biscuit, JsValue> {
         Ok(Biscuit(
             biscuit::Biscuit::from_base64(data, root.0)
+                .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
+        ))
+    }
+
+    /// Deserializes a token from URL safe base 64 data with a public key map
+    ///
+    /// This will check the signature using a public key found in the provided key map. The key passed at `-1` is used as the default key
+    #[wasm_bindgen(js_name = fromBase64WithKeyMap)]
+    pub fn from_base64_with_key_map(data: &str, key_map: &JsValue) -> Result<Biscuit, JsValue> {
+        let key_map: KeyMap = serde_wasm_bindgen::from_value(key_map.clone())?;
+        Ok(Biscuit(
+            biscuit::Biscuit::from_base64(data, key_map)
                 .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }

@@ -113,6 +113,23 @@ deny if true;
   t.end();
 });
 
+test("parsing & key check", function(t) {
+  let pk = PrivateKey.fromString(
+    "473b5189232f3f597b5c2f3f9b0d5e28b1ee4e7cce67ec6b7fbf5984157a6b97"
+  );
+  let root = KeyPair.fromPrivateKey(pk);
+
+  let biscuitBuilder = biscuit`test(true);`;
+
+  let token = biscuitBuilder
+    .build(root.getPrivateKey()) // biscuit token
+  let serializedToken = token.toBase64();
+
+  let parsedToken = Biscuit.fromBase64WithKeyMap(serializedToken, [[-1, root.getPublicKey()]]);
+
+  t.end();
+});
+
 test("complete lifecycle", function(t) {
   let pk = PrivateKey.fromString(
     "473b5189232f3f597b5c2f3f9b0d5e28b1ee4e7cce67ec6b7fbf5984157a6b97"

@@ -10,8 +10,7 @@ pub struct KeyPair(pub(crate) biscuit::KeyPair);
 impl KeyPair {
     #[wasm_bindgen(constructor)]
     pub fn new() -> KeyPair {
-        let mut rng = make_rng();
-        KeyPair(biscuit::KeyPair::new_with_rng(&mut rng))
+        KeyPair(biscuit::KeyPair::new())
     }
 
     #[wasm_bindgen(js_name = fromPrivateKey)]
