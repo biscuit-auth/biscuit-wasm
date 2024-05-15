@@ -91,7 +91,14 @@ test("authorizer builder", function(t) {
   // BlockBuilder and BiscuitBuilder
   t.equal(
     builder.toString(),
-    `// Checks:
+    `// Facts:
+// origin: authorizer
+fact("1234");
+
+// Rules:
+// origin: authorizer\nu($id) <- user($id, "1234");
+
+// Checks:
 // origin: authorizer
 check if check("1234");
 check if true;
@@ -133,7 +140,9 @@ test("complete lifecycle", function(t) {
 
   let otherKeyPair = new KeyPair();
   let r = rule`u($id) <- user($id), $id == ${id} trusting authority, ${otherKeyPair.getPublicKey()}`;
-  let facts = auth.query(r);
+  let facts = auth.queryWithLimits(r, {
+    max_time_micro: 100000
+  });
   t.equal(facts.length, 1, "correct number of query results");
   t.equal(facts[0].toString(), `u("1234")`, "correct query result");
   t.end();
@@ -246,7 +255,9 @@ test("third-party blocks", function(t) {
   t.equal(policy, 0, "authorization suceeded");
 
   let r1 = rule`g($group) <- group($group) trusting ${thirdPartyRoot.getPublicKey()}`;
-  let facts = auth.query(r1);
+  let facts = auth.queryWithLimits(r1, {
+    max_time_micro: 100000
+  });
   t.equal(facts.length, 1, "correct number of query results");
   t.equal(facts[0].toString(), `g("admin")`, "correct query result");
 
