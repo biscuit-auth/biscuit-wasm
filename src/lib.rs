@@ -108,9 +108,9 @@ impl Biscuit {
     /// This will check the signature using a public key found in the provided key map. The key passed at `-1` is used as the default key
     #[wasm_bindgen(js_name = fromBytesWithKeyMap)]
     pub fn from_bytes_with_key_map(data: &[u8], key_map: &JsValue) -> Result<Biscuit, JsValue> {
-        let key_map: KeyMap = serde_wasm_bindgen::from_value(key_map.clone())?;
+        let key_map: HashMap<i64, PublicKey> = serde_wasm_bindgen::from_value(key_map.clone())?;
         Ok(Biscuit(
-            biscuit::Biscuit::from(data, key_map)
+            biscuit::Biscuit::from(data, KeyMap(key_map))
                 .map_err(|e| serde_wasm_bindgen::to_value(&e).unwrap())?,
         ))
     }

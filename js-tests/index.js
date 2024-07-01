@@ -125,7 +125,9 @@ test("parsing & key check", function(t) {
     .build(root.getPrivateKey()) // biscuit token
   let serializedToken = token.toBase64();
 
-  let parsedToken = Biscuit.fromBase64WithKeyMap(serializedToken, [[-1, root.getPublicKey()]]);
+  let keyMap = new Map();
+  keyMap.set(-1, root.getPublicKey());
+  let parsedToken = Biscuit.fromBase64WithKeyMap(serializedToken, keyMap);
 
   t.end();
 });
