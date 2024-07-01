@@ -1,3 +1,10 @@
+# `0.4.1`
+
+- Bump biscuit-auth to `4.1.1` (#40) (Clément Delafargue)
+- Add `.setRootKeyId()` to biscuit builder (#44) (louisjmorgan)
+- Stricter `Authorization` header parsing in express middleware (#39) (Clément Delafargue)
+- Documentation fixes (#38) (Clément Delafargue)
+
 # `0.4.0`
 
 - Bump biscuit-auth to `3.1.0` (#36) (Clément Delafargue)

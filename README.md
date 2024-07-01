@@ -11,7 +11,7 @@ Add this dependency to your `package.json`:
 ```json
 {
     "dependencies": {
-        "@biscuit-auth/biscuit-wasm": "0.4.0-beta1"
+        "@biscuit-auth/biscuit-wasm": "0.4.1"
     }
 }
 ```
