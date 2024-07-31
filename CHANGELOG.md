@@ -1,3 +1,7 @@
+# `0.5.0`
+
+- Bump biscuit-auth to `5.0.0` (Clément Delafargue)
+
 # `0.4.1`
 
 - Bump biscuit-auth to `4.1.1` (#40) (Clément Delafargue)
